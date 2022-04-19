@@ -29,27 +29,6 @@ public class LevelEntryData : MonoBehaviour
 
     public void LoadLevel()
     {
-        StartCoroutine(DownloadLevelTextFile(textFileURL));
-    }
-
-    private IEnumerator DownloadLevelTextFile(string textFileURL)
-    {
-        UnityWebRequest www = UnityWebRequest.Get(textFileURL);
-
-        yield return www.SendWebRequest();
-
-        string filePath = Application.dataPath + "/" + "LevelData.json";
-
-        File.WriteAllText(filePath, www.downloadHandler.text);
-
-        AssetDatabase.Refresh();
-
-        yield return new WaitForSeconds(1f);
-
-        EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
-
-        yield return new WaitForSeconds(1f);
-
-        EventSystemNew.RaiseEvent(Event_Type.CLOSE_DOWNLOAD_MENU);
+        EventSystemNew<string>.RaiseEvent(Event_Type.LOAD_LEVEL, textFileURL);
     }
 }

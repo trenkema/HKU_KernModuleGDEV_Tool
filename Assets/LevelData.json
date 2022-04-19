@@ -2,21 +2,17 @@
     "prefabLevelData": {
         "prefabIDs": [
             0,
-            1,
-            6
+            1
         ],
         "positionsX": [
             -2.5,
-            11.5,
-            2.5
+            11.5
         ],
         "positionsY": [
-            0.5,
             0.5,
             0.5
         ],
         "zRotation": [
-            0.0,
             0.0,
             0.0
         ]
@@ -1043,7 +1039,6 @@
                     "BlueBG",
                     "BlueBG",
                     "BlueBG",
-                    "BrownBG",
                     "BlueBG",
                     "BlueBG",
                     "BlueBG",
@@ -1080,7 +1075,6 @@
                     "BlueBG",
                     "BlueBG",
                     "BlueBG",
-                    "BrownBG",
                     "BlueBG",
                     "BlueBG",
                     "BlueBG",
@@ -1117,7 +1111,9 @@
                     "BlueBG",
                     "BlueBG",
                     "BlueBG",
-                    "BrownBG",
+                    "BlueBG",
+                    "BlueBG",
+                    "BlueBG",
                     "BlueBG",
                     "BlueBG",
                     "BlueBG",

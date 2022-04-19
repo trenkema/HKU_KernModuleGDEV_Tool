@@ -9,14 +9,15 @@ public enum Event_Type
     ENABLE_LEVEL_EDITOR,
     ROTATE_ITEM,
     LOAD_PREFABS,
+    LOADING_SCREEN,
     LOAD_LEVEL,
-    CLOSE_DOWNLOAD_MENU,
     DESTROY_DRAG_IMAGE,
     START_ADDED,
     FINISH_ADDED,
     GAME_STARTED,
     LEVEL_COMPLETED,
-    EDIT_LEVEL
+    EDIT_LEVEL,
+    ASSET_ID
 }
 
 public static class EventSystemNew

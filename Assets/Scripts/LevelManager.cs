@@ -6,6 +6,7 @@ using System.IO;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
+using UnityEditor;
 
 public enum LevelManagerType
 {
@@ -22,6 +23,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] GameObject editorUI;
     [SerializeField] GameObject inGameUI;
 
+    [SerializeField] GameObject loadingLevelUI;
+
     [SerializeField] GameObject levelUploadUI;
 
     [SerializeField] GameObject downloadLevelUI;
@@ -36,16 +39,22 @@ public class LevelManager : MonoBehaviour
 
     List<GameObject> displayItems = new List<GameObject>();
 
+    public string playerID = "";
+
     string levelName;
 
     int startPointAdded = 0;
     int finishPointAdded = 0;
 
+    System.Action<LootLockerUserGenerateContentResponse> uploadResponse;
+
     private void OnEnable()
     {
-        EventSystemNew.Subscribe(Event_Type.CLOSE_DOWNLOAD_MENU, CloseDownloadMenu);
+        uploadResponse += CreateLevelData;
 
-        EventSystemNew.Subscribe(Event_Type.LOAD_LEVEL, LoadLevel);
+        EventSystemNew<bool>.Subscribe(Event_Type.LOADING_SCREEN, SetLoadingScreen);
+
+        EventSystemNew<string>.Subscribe(Event_Type.LOAD_LEVEL, LoadLevelData);
 
         EventSystemNew<int>.Subscribe(Event_Type.START_ADDED, StartAdded);
         EventSystemNew<int>.Subscribe(Event_Type.FINISH_ADDED, FinishAdded);
@@ -55,9 +64,11 @@ public class LevelManager : MonoBehaviour
 
     private void OnDisable()
     {
-        EventSystemNew.Unsubscribe(Event_Type.CLOSE_DOWNLOAD_MENU, CloseDownloadMenu);
+        uploadResponse -= CreateLevelData;
 
-        EventSystemNew.Unsubscribe(Event_Type.LOAD_LEVEL, LoadLevel);
+        EventSystemNew<bool>.Unsubscribe(Event_Type.LOADING_SCREEN, SetLoadingScreen);
+
+        EventSystemNew<string>.Unsubscribe(Event_Type.LOAD_LEVEL, LoadLevelData);
 
         EventSystemNew<int>.Unsubscribe(Event_Type.START_ADDED, StartAdded);
         EventSystemNew<int>.Unsubscribe(Event_Type.FINISH_ADDED, FinishAdded);
@@ -67,22 +78,36 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
-        LootLockerSDKManager.StartGuestSession((response) =>
+        LootLockerSDKManager.GetPlayerName(response =>
         {
-            if (response.success)
+            if (!response.success)
             {
-                Debug.Log("Started Session");
-            }
-            else
-            {
-                Debug.Log(response.Error);
-
-                Debug.Log("Failed Starting Session");
-
                 failedToLoadUI.SetActive(true);
+                return;
             }
+
+            playerID = response.name;
         });
     }
+
+    //private void Start()
+    //{
+    //    LootLockerSDKManager.StartGuestSession((response) =>
+    //    {
+    //        if (response.success)
+    //        {
+    //            Debug.Log("Started Session");
+    //        }
+    //        else
+    //        {
+    //            Debug.Log(response.Error);
+
+    //            Debug.Log("Failed Starting Session");
+
+    //            failedToLoadUI.SetActive(true);
+    //        }
+    //    });
+    //}
 
     private void SaveLevel()
     {
@@ -98,6 +123,12 @@ public class LevelManager : MonoBehaviour
         Debug.Log("Level Saved");
     }
 
+    private void SetLoadingScreen(bool _isActive)
+    {
+        downloadLevelUI.SetActive(false);
+        loadingLevelUI.SetActive(_isActive);
+    }
+
     private void LoadLevel()
     {
         string json = File.ReadAllText(Application.dataPath + "/LevelData.json");
@@ -108,26 +139,66 @@ public class LevelManager : MonoBehaviour
         PrefabLevelEditor.Instance.LoadLevel(levelData.prefabLevelData);
     }
 
-    private void CloseDownloadMenu()
+    private void LoadLevelData(string _textFileURL)
     {
-        downloadLevelUI.SetActive(false);
+        StartCoroutine(DownloadLevelTextFile(_textFileURL));
+    }
+
+    private IEnumerator DownloadLevelTextFile(string textFileURL)
+    {
+        UnityWebRequest www = UnityWebRequest.Get(textFileURL);
+
+        yield return www.SendWebRequest();
+
+        string filePath = Application.dataPath + "/" + "LevelData.json";
+
+        File.WriteAllText(filePath, www.downloadHandler.text);
+
+        AssetDatabase.Refresh();
+
+        EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, true);
+
+        yield return new WaitForSeconds(1f);
+
+        EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
+
+        yield return new WaitForSeconds(0.5f);
+
+        string json = File.ReadAllText(Application.dataPath + "/LevelData.json");
+
+        AllLevelData levelData = JsonUtility.FromJson<AllLevelData>(json);
+
+        TileLevelManager.Instance.LoadLevel(levelData.tileLevelData);
+        PrefabLevelEditor.Instance.LoadLevel(levelData.prefabLevelData);
+
+        EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
     }
 
     public void CreateLevel()
     {
         levelName = levelNameInputField.text;
 
-        LootLockerSDKManager.CreatingAnAssetCandidate(levelName, (response) =>
+        Dictionary<string, string> test = new Dictionary<string, string>();
+
+        test.Add("playerID", playerID);
+
+        LootLockerSDKManager.CreatingAnAssetCandidate(levelName, uploadResponse, test);
+    }
+
+    public void CreateLevelData(LootLockerUserGenerateContentResponse response)
+    {
+        if (response.success)
         {
-            if (response.success)
-            {
-                UploadLevelData(response.asset_candidate_id);
-            }
-            else
-            {
-                Debug.Log("Error asset candidate");
-            }
-        });
+            UploadLevelData(response.asset_candidate_id);
+
+            //Debug.Log("KAKA: " + response.)
+
+            Debug.Log("CandidateID: " + response.asset_candidate_id);
+        }
+        else
+        {
+            Debug.Log("Error asset candidate");
+        }
     }
 
     public void TakeScreenshot()
@@ -180,9 +251,16 @@ public class LevelManager : MonoBehaviour
                 {
                     if (textResponse.success)
                     {
+                        //SetAssetKV(TextReade.asset_candidate.asset_id.Value);
+
+                        LootLockerSDKManager.GetAssetInformation(_levelID.ToString(), (response) =>
+                        {
+                            Debug.Log("Player ID: " + response.asset_candidate.created_by_player_id);
+                        });
+
                         LootLockerSDKManager.UpdatingAnAssetCandidate(_levelID, true, (updatedResponse) =>
                         {
-
+                            Debug.Log("ContextID: " + updatedResponse.asset_candidate.data.context_id);
                         });
                     }
                     else
@@ -221,6 +299,9 @@ public class LevelManager : MonoBehaviour
 
                 levelEntryData.id = i;
                 levelEntryData.levelName = response.assets[i].name;
+
+                //Debug.Log("IDs " + response.assets[i].asset_candidate.created_by_player_id);
+                Debug.Log("IDs " + response.assets[i].id);
 
                 LootLockerFile[] levelImageFiles = response.assets[i].files;
 
