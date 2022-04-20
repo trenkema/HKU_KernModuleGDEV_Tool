@@ -33,18 +33,20 @@ public class LevelManager : MonoBehaviour
 
     [SerializeField] GameObject levelCompletedUI;
 
+    [SerializeField] GameObject gameOverUI;
+
     [SerializeField] GameObject levelEntryDisplayItem;
 
     [SerializeField] Transform levelDataEntryContent;
 
     List<GameObject> displayItems = new List<GameObject>();
 
-    public string playerID = "";
-
     string levelName;
 
     int startPointAdded = 0;
     int finishPointAdded = 0;
+
+    bool retrieveOwnLevelsOnly = false;
 
     System.Action<LootLockerUserGenerateContentResponse> uploadResponse;
 
@@ -85,29 +87,8 @@ public class LevelManager : MonoBehaviour
                 failedToLoadUI.SetActive(true);
                 return;
             }
-
-            playerID = response.name;
         });
     }
-
-    //private void Start()
-    //{
-    //    LootLockerSDKManager.StartGuestSession((response) =>
-    //    {
-    //        if (response.success)
-    //        {
-    //            Debug.Log("Started Session");
-    //        }
-    //        else
-    //        {
-    //            Debug.Log(response.Error);
-
-    //            Debug.Log("Failed Starting Session");
-
-    //            failedToLoadUI.SetActive(true);
-    //        }
-    //    });
-    //}
 
     private void SaveLevel()
     {
@@ -154,7 +135,9 @@ public class LevelManager : MonoBehaviour
 
         File.WriteAllText(filePath, www.downloadHandler.text);
 
+#if UNITY_EDITOR
         AssetDatabase.Refresh();
+#endif
 
         EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, true);
 
@@ -180,8 +163,6 @@ public class LevelManager : MonoBehaviour
 
         Dictionary<string, string> test = new Dictionary<string, string>();
 
-        test.Add("playerID", playerID);
-
         LootLockerSDKManager.CreatingAnAssetCandidate(levelName, uploadResponse, test);
     }
 
@@ -190,8 +171,6 @@ public class LevelManager : MonoBehaviour
         if (response.success)
         {
             UploadLevelData(response.asset_candidate_id);
-
-            //Debug.Log("KAKA: " + response.)
 
             Debug.Log("CandidateID: " + response.asset_candidate_id);
         }
@@ -251,17 +230,35 @@ public class LevelManager : MonoBehaviour
                 {
                     if (textResponse.success)
                     {
-                        //SetAssetKV(TextReade.asset_candidate.asset_id.Value);
-
-                        LootLockerSDKManager.GetAssetInformation(_levelID.ToString(), (response) =>
-                        {
-                            Debug.Log("Player ID: " + response.asset_candidate.created_by_player_id);
-                        });
-
                         LootLockerSDKManager.UpdatingAnAssetCandidate(_levelID, true, (updatedResponse) =>
                         {
-                            Debug.Log("ContextID: " + updatedResponse.asset_candidate.data.context_id);
+                            if (updatedResponse.success)
+                            {
+                                LootLockerSDKManager.GetSingleKeyPersistentStorage("playerID", (response) =>
+                                {
+                                    if (response.success)
+                                    {
+                                        if (response.payload == null)
+                                        {
+                                            LootLockerSDKManager.GetAssetListWithCount(999999, (response) =>
+                                            {
+                                                for (int i = 0; i < response.assets.Length; i++)
+                                                {
+                                                    if (levelName == response.assets[i].name)
+                                                    {
+                                                        LootLockerSDKManager.UpdateOrCreateKeyValue("playerID", (response.assets[i].asset_candidate.created_by_player_id).ToString(), (getPersistentStorageResponse) =>
+                                                        {
+
+                                                        });
+                                                    }
+                                                }
+                                            }, null, true);
+                                        }
+                                    }
+                                });
+                            }
                         });
+
                     }
                     else
                     {
@@ -285,29 +282,63 @@ public class LevelManager : MonoBehaviour
 
         displayItems.Clear();
 
-        LootLockerSDKManager.GetAssetListWithCount(10, (response) =>
+        LootLockerSDKManager.GetAssetListWithCount(999999, (response) =>
         {
-            for (int i = 0; i < response.assets.Length; i++)
+            if (retrieveOwnLevelsOnly)
             {
-                GameObject displayItem = Instantiate(levelEntryDisplayItem, transform.position, Quaternion.identity);
+                LootLockerSDKManager.GetSingleKeyPersistentStorage("playerID", (playerIDResponse) =>
+                {
+                    if (playerIDResponse.success)
+                    {
+                        if (playerIDResponse.payload != null)
+                        {
+                            for (int i = 0; i < response.assets.Length; i++)
+                            {
+                                if (response.assets[i].asset_candidate.created_by_player_id.ToString() == playerIDResponse.payload.value)
+                                {
+                                    GameObject displayItem = Instantiate(levelEntryDisplayItem, transform.position, Quaternion.identity);
 
-                displayItems.Add(displayItem);
+                                    displayItems.Add(displayItem);
 
-                displayItem.transform.SetParent(levelDataEntryContent);
+                                    displayItem.transform.SetParent(levelDataEntryContent);
 
-                LevelEntryData levelEntryData = displayItem.GetComponent<LevelEntryData>();
+                                    LevelEntryData levelEntryData = displayItem.GetComponent<LevelEntryData>();
 
-                levelEntryData.id = i;
-                levelEntryData.levelName = response.assets[i].name;
+                                    levelEntryData.id = i;
+                                    levelEntryData.levelName = response.assets[i].name;
 
-                //Debug.Log("IDs " + response.assets[i].asset_candidate.created_by_player_id);
-                Debug.Log("IDs " + response.assets[i].id);
+                                    LootLockerFile[] levelImageFiles = response.assets[i].files;
 
-                LootLockerFile[] levelImageFiles = response.assets[i].files;
+                                    StartCoroutine(LoadLevelIcon(levelImageFiles[0].url.ToString(), levelEntryData.levelIcon));
 
-                StartCoroutine(LoadLevelIcon(levelImageFiles[0].url.ToString(), levelEntryData.levelIcon));
+                                    levelEntryData.textFileURL = levelImageFiles[1].url.ToString();
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            else
+            {
+                for (int i = 0; i < response.assets.Length; i++)
+                {
+                    GameObject displayItem = Instantiate(levelEntryDisplayItem, transform.position, Quaternion.identity);
 
-                levelEntryData.textFileURL = levelImageFiles[1].url.ToString();
+                    displayItems.Add(displayItem);
+
+                    displayItem.transform.SetParent(levelDataEntryContent);
+
+                    LevelEntryData levelEntryData = displayItem.GetComponent<LevelEntryData>();
+
+                    levelEntryData.id = i;
+                    levelEntryData.levelName = response.assets[i].name;
+
+                    LootLockerFile[] levelImageFiles = response.assets[i].files;
+
+                    StartCoroutine(LoadLevelIcon(levelImageFiles[0].url.ToString(), levelEntryData.levelIcon));
+
+                    levelEntryData.textFileURL = levelImageFiles[1].url.ToString();
+                }
             }
         }, null, true);
     }
@@ -378,6 +409,30 @@ public class LevelManager : MonoBehaviour
         {
             missingStartOrFinishUI.SetActive(true);
         }
+    }
+
+    public void DeleteAllAssets()
+    {
+        LootLockerSDKManager.GetAssetListWithCount(999999, (response) =>
+        {
+            for (int i = 0; i < response.assets.Length; i++)
+            {
+                LootLockerSDKManager.DeletingAnAssetCandidate(response.assets[i].id, (deleteResponse) =>
+                {
+                    if (deleteResponse.success)
+                    {
+                        Debug.Log("Deleted Asset");
+                    }
+                });
+            }
+        }, null, true);
+    }
+
+    public void SetRetrieveOwnLevelsOnly(bool _retrieveOwnOnly)
+    {
+        retrieveOwnLevelsOnly = !_retrieveOwnOnly;
+
+        DownloadLevelData();
     }
 
     public void QuitGame()

@@ -6,7 +6,12 @@ using LootLocker.Requests;
 
 public class WhiteLabelManager : MonoBehaviour
 {
+    [SerializeField] TextMeshProUGUI loggedInNameText;
+
     [SerializeField] GameObject authenticationUI;
+    [SerializeField] GameObject loginUI;
+    [SerializeField] GameObject registerUI;
+
     [SerializeField] GameObject mainMenuUI;
 
     // New User
@@ -16,10 +21,80 @@ public class WhiteLabelManager : MonoBehaviour
 
     // Existing User
     [SerializeField] TMP_InputField existingEmailInputField;
-    [SerializeField] TMP_InputField existingUsernameInputField;
     [SerializeField] TMP_InputField existingPasswordInputField;
 
     [SerializeField] TextMeshProUGUI errorText;
+
+    string playerName = "";
+
+    private void Start()
+    {
+        loggedInNameText.gameObject.SetActive(false);
+        authenticationUI.SetActive(false);
+        mainMenuUI.SetActive(false);
+
+        CheckForPreviousSession();
+    }
+
+    private void CheckForPreviousSession()
+    {
+        LootLockerSDKManager.CheckWhiteLabelSession(response =>
+        {
+            if (!response)
+            {
+                authenticationUI.SetActive(true);
+            }
+            else
+            {
+                LootLockerSDKManager.StartWhiteLabelSession((response) =>
+                {
+                    if (!response.success)
+                    {
+                        authenticationUI.SetActive(true);
+
+                        Debug.Log("Error Starting Session");
+                        return;
+                    }
+                    else
+                    {
+                        LootLockerSDKManager.GetPlayerName(response =>
+                        {
+                            playerName = response.name;
+
+                            loggedInNameText.gameObject.SetActive(true);
+
+                            loggedInNameText.text = "LOGGED IN: " + playerName;
+                        });
+
+                        authenticationUI.SetActive(false);
+                        mainMenuUI.SetActive(true);
+                    }
+                });
+            }
+        });
+    }
+
+    public void Logout()
+    {
+        LootLockerSessionRequest sessionRequest = new LootLockerSessionRequest();
+
+        LootLocker.LootLockerAPIManager.EndSession(sessionRequest, (response) =>
+        {
+            if (!response.success)
+            {
+                Error(response.Error);
+                return;
+            }
+
+            loggedInNameText.gameObject.SetActive(false);
+            mainMenuUI.SetActive(false);
+            authenticationUI.SetActive(true);
+            registerUI.SetActive(false);
+            loginUI.SetActive(true);
+
+            Debug.Log("Account Created");
+        });
+    }
 
     public void Login()
     {
@@ -28,7 +103,7 @@ public class WhiteLabelManager : MonoBehaviour
         string email = existingEmailInputField.text;
         string password = existingPasswordInputField.text;
 
-        LootLockerSDKManager.WhiteLabelLogin(email, password, false, response =>
+        LootLockerSDKManager.WhiteLabelLogin(email, password, true, response =>
         {
             if (!response.success)
             {
@@ -50,6 +125,15 @@ public class WhiteLabelManager : MonoBehaviour
                 }
                 else
                 {
+                    LootLockerSDKManager.GetPlayerName(response =>
+                    {
+                        playerName = response.name;
+
+                        loggedInNameText.gameObject.SetActive(true);
+
+                        loggedInNameText.text = "LOGGED IN: " + playerName;
+                    });
+
                     authenticationUI.SetActive(false);
                     mainMenuUI.SetActive(true);
                 }
@@ -77,7 +161,7 @@ public class WhiteLabelManager : MonoBehaviour
             }
             else
             {
-                LootLockerSDKManager.WhiteLabelLogin(email, password, false, response =>
+                LootLockerSDKManager.WhiteLabelLogin(email, password, true, response =>
                 {
                     if (!response.success)
                     {
@@ -115,6 +199,9 @@ public class WhiteLabelManager : MonoBehaviour
                                     Error(response.Error);
                                     return;
                                 }
+
+                                registerUI.SetActive(false);
+                                loginUI.SetActive(true);
 
                                 Debug.Log("Account Created");
                             });
