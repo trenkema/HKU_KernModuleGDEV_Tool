@@ -306,6 +306,7 @@ public class LevelManager : MonoBehaviour
 
                                     levelEntryData.id = i;
                                     levelEntryData.levelName = response.assets[i].name;
+                                    //levelEntryData.authorName = response.assets[i].;
 
                                     LootLockerFile[] levelImageFiles = response.assets[i].files;
 

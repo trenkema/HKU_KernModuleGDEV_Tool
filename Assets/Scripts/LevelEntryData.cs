@@ -10,7 +10,10 @@ using TMPro;
 public class LevelEntryData : MonoBehaviour
 {
     public int id;
+
     public string levelName;
+
+    public string authorName;
 
     public string textFileURL;
 
@@ -18,12 +21,17 @@ public class LevelEntryData : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI nameText;
 
+    [SerializeField] TextMeshProUGUI authorNameText;
+
     private void Start()
     {
         transform.position = Vector3.zero;
         transform.localScale = Vector3.one;
 
         nameText.text = levelName;
+
+        authorNameText.text = "Created By: " + authorName;
+
         levelIcon.sprite = levelIcon.sprite;
     }
 
