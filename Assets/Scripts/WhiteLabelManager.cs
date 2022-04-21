@@ -12,6 +12,8 @@ public class WhiteLabelManager : MonoBehaviour
     [SerializeField] GameObject loginUI;
     [SerializeField] GameObject registerUI;
 
+    [SerializeField] GameObject selectModeUI;
+
     [SerializeField] GameObject mainMenuUI;
 
     // New User
@@ -87,6 +89,7 @@ public class WhiteLabelManager : MonoBehaviour
             }
 
             loggedInNameText.gameObject.SetActive(false);
+            selectModeUI.SetActive(false);
             mainMenuUI.SetActive(false);
             authenticationUI.SetActive(true);
             registerUI.SetActive(false);
