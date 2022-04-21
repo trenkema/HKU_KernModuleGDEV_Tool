@@ -8,6 +8,8 @@ public class WhiteLabelManager : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI loggedInNameText;
 
+    [SerializeField] GameObject logoutButton;
+
     [SerializeField] GameObject authenticationUI;
     [SerializeField] GameObject loginUI;
     [SerializeField] GameObject registerUI;
@@ -31,6 +33,8 @@ public class WhiteLabelManager : MonoBehaviour
 
     private void Start()
     {
+        logoutButton.SetActive(false);
+
         loggedInNameText.gameObject.SetActive(false);
         authenticationUI.SetActive(false);
         mainMenuUI.SetActive(false);
@@ -68,6 +72,8 @@ public class WhiteLabelManager : MonoBehaviour
                             loggedInNameText.text = "LOGGED IN: " + playerName;
                         });
 
+                        logoutButton.SetActive(true);
+
                         authenticationUI.SetActive(false);
                         mainMenuUI.SetActive(true);
                     }
@@ -87,6 +93,8 @@ public class WhiteLabelManager : MonoBehaviour
                 Error(response.Error);
                 return;
             }
+
+            logoutButton.SetActive(false);
 
             loggedInNameText.gameObject.SetActive(false);
             selectModeUI.SetActive(false);
@@ -136,6 +144,8 @@ public class WhiteLabelManager : MonoBehaviour
 
                         loggedInNameText.text = "LOGGED IN: " + playerName;
                     });
+
+                    logoutButton.SetActive(true);
 
                     authenticationUI.SetActive(false);
                     mainMenuUI.SetActive(true);

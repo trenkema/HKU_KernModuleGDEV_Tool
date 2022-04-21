@@ -306,7 +306,8 @@ public class LevelManager : MonoBehaviour
 
                                     levelEntryData.id = i;
                                     levelEntryData.levelName = response.assets[i].name;
-                                    //levelEntryData.authorName = response.assets[i].;
+
+                                    response.assets[0].active = false;
 
                                     LootLockerFile[] levelImageFiles = response.assets[i].files;
 
@@ -416,16 +417,16 @@ public class LevelManager : MonoBehaviour
     {
         LootLockerSDKManager.GetAssetListWithCount(999999, (response) =>
         {
-            for (int i = 0; i < response.assets.Length; i++)
-            {
-                LootLockerSDKManager.DeletingAnAssetCandidate(response.assets[i].id, (deleteResponse) =>
-                {
-                    if (deleteResponse.success)
-                    {
-                        Debug.Log("Deleted Asset");
-                    }
-                });
-            }
+            //for (int i = 0; i < response.assets.Length; i++)
+            //{
+            //    LootLockerSDKManager.DeletingAnAssetCandidate(response.assets[i].id, (deleteResponse) =>
+            //    {
+            //        if (deleteResponse.success)
+            //        {
+            //            Debug.Log("Deleted Asset: " + response.assets[i].name);
+            //        }
+            //    });
+            //}
         }, null, true);
     }
 

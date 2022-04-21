@@ -16246,6 +16246,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loggedInNameText: {fileID: 936701273}
+  logoutButton: {fileID: 346457833}
   authenticationUI: {fileID: 770074054}
   loginUI: {fileID: 2104196752}
   registerUI: {fileID: 299644895}

@@ -13,15 +13,11 @@ public class LevelEntryData : MonoBehaviour
 
     public string levelName;
 
-    public string authorName;
-
     public string textFileURL;
 
     public Image levelIcon;
 
     [SerializeField] TextMeshProUGUI nameText;
-
-    [SerializeField] TextMeshProUGUI authorNameText;
 
     private void Start()
     {
@@ -29,8 +25,6 @@ public class LevelEntryData : MonoBehaviour
         transform.localScale = Vector3.one;
 
         nameText.text = levelName;
-
-        authorNameText.text = "Created By: " + authorName;
 
         levelIcon.sprite = levelIcon.sprite;
     }
