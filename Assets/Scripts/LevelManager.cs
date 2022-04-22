@@ -43,6 +43,8 @@ public class LevelManager : MonoBehaviour
 
     string levelName;
 
+    string playerName;
+
     int startPointAdded = 0;
     int finishPointAdded = 0;
 
@@ -87,6 +89,8 @@ public class LevelManager : MonoBehaviour
                 failedToLoadUI.SetActive(true);
                 return;
             }
+
+            playerName = response.name;
         });
     }
 
@@ -161,9 +165,10 @@ public class LevelManager : MonoBehaviour
     {
         levelName = levelNameInputField.text;
 
-        Dictionary<string, string> test = new Dictionary<string, string>();
+        Dictionary<string, string> KV = new Dictionary<string, string>();
+        KV.Add("playerName", playerName);
 
-        LootLockerSDKManager.CreatingAnAssetCandidate(levelName, uploadResponse, test);
+        LootLockerSDKManager.CreatingAnAssetCandidate(levelName, uploadResponse, KV);
     }
 
     public void CreateLevelData(LootLockerUserGenerateContentResponse response)
