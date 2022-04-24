@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
 using UnityEditor;
+using LootLocker.Admin;
 
 public enum LevelManagerType
 {
@@ -60,6 +61,8 @@ public class LevelManager : MonoBehaviour
 
         EventSystemNew<string>.Subscribe(Event_Type.LOAD_LEVEL, LoadLevelData);
 
+        EventSystemNew<string, string>.Subscribe(Event_Type.DEACTIVATE_LEVEL, DeactiveLevel);
+
         EventSystemNew<int>.Subscribe(Event_Type.START_ADDED, StartAdded);
         EventSystemNew<int>.Subscribe(Event_Type.FINISH_ADDED, FinishAdded);
 
@@ -73,6 +76,8 @@ public class LevelManager : MonoBehaviour
         EventSystemNew<bool>.Unsubscribe(Event_Type.LOADING_SCREEN, SetLoadingScreen);
 
         EventSystemNew<string>.Unsubscribe(Event_Type.LOAD_LEVEL, LoadLevelData);
+
+        EventSystemNew<string, string>.Unsubscribe(Event_Type.DEACTIVATE_LEVEL, DeactiveLevel);
 
         EventSystemNew<int>.Unsubscribe(Event_Type.START_ADDED, StartAdded);
         EventSystemNew<int>.Unsubscribe(Event_Type.FINISH_ADDED, FinishAdded);
@@ -165,10 +170,15 @@ public class LevelManager : MonoBehaviour
     {
         levelName = levelNameInputField.text;
 
-        Dictionary<string, string> KV = new Dictionary<string, string>();
-        KV.Add("playerName", playerName);
+        LootLockerSDKManager.CreatingAnAssetCandidate(levelName, (response) =>
+        {
+            if (response.success)
+            {
+                Debug.Log("Created Asset");
 
-        LootLockerSDKManager.CreatingAnAssetCandidate(levelName, uploadResponse, KV);
+                UploadLevelData(response.asset_candidate_id);
+            }
+        });
     }
 
     public void CreateLevelData(LootLockerUserGenerateContentResponse response)
@@ -235,6 +245,10 @@ public class LevelManager : MonoBehaviour
                 {
                     if (textResponse.success)
                     {
+                        Dictionary<string, string> KV = new Dictionary<string, string>();
+                        KV.Add("playerName", playerName);
+                        KV.Add("assetID", _levelID.ToString());
+
                         LootLockerSDKManager.UpdatingAnAssetCandidate(_levelID, true, (updatedResponse) =>
                         {
                             if (updatedResponse.success)
@@ -251,10 +265,19 @@ public class LevelManager : MonoBehaviour
                                                 {
                                                     if (levelName == response.assets[i].name)
                                                     {
-                                                        LootLockerSDKManager.UpdateOrCreateKeyValue("playerID", (response.assets[i].asset_candidate.created_by_player_id).ToString(), (getPersistentStorageResponse) =>
+                                                        for (int ii = 0; ii < response.assets[i].storage.Length; ii++)
                                                         {
+                                                            if (response.assets[i].storage[ii].key == "assetID")
+                                                            {
+                                                                if (_levelID.ToString() == response.assets[i].storage[ii].value)
+                                                                {
+                                                                    LootLockerSDKManager.UpdateOrCreateKeyValue("playerID", (response.assets[i].asset_candidate.created_by_player_id).ToString(), (getPersistentStorageResponse) =>
+                                                                    {
 
-                                                        });
+                                                                    });
+                                                                }
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }, null, true);
@@ -262,8 +285,7 @@ public class LevelManager : MonoBehaviour
                                     }
                                 });
                             }
-                        });
-
+                        }, null, KV);
                     }
                     else
                     {
@@ -311,8 +333,15 @@ public class LevelManager : MonoBehaviour
 
                                     levelEntryData.id = i;
                                     levelEntryData.levelName = response.assets[i].name;
+                                    levelEntryData.EnableDeleteButton();
 
-                                    response.assets[0].active = false;
+                                    for (int ii = 0; ii < response.assets[i].storage.Length; ii++)
+                                    {
+                                        if (response.assets[i].storage[ii].key == "assetID")
+                                        {
+                                            levelEntryData.assetID = response.assets[i].storage[ii].value;
+                                        }
+                                    }
 
                                     LootLockerFile[] levelImageFiles = response.assets[i].files;
 
@@ -327,25 +356,54 @@ public class LevelManager : MonoBehaviour
             }
             else
             {
-                for (int i = 0; i < response.assets.Length; i++)
+                LootLockerSDKManager.GetSingleKeyPersistentStorage("playerID", (playerIDResponse) =>
                 {
-                    GameObject displayItem = Instantiate(levelEntryDisplayItem, transform.position, Quaternion.identity);
+                    string playerID = "";
 
-                    displayItems.Add(displayItem);
+                    if (playerIDResponse.success)
+                    {
+                        if (playerIDResponse.payload != null)
+                        {
+                            playerID = playerIDResponse.payload.value;
+                        }
+                    }
 
-                    displayItem.transform.SetParent(levelDataEntryContent);
+                    for (int i = 0; i < response.assets.Length; i++)
+                    {
+                        GameObject displayItem = Instantiate(levelEntryDisplayItem, transform.position, Quaternion.identity);
 
-                    LevelEntryData levelEntryData = displayItem.GetComponent<LevelEntryData>();
+                        displayItems.Add(displayItem);
 
-                    levelEntryData.id = i;
-                    levelEntryData.levelName = response.assets[i].name;
+                        displayItem.transform.SetParent(levelDataEntryContent);
 
-                    LootLockerFile[] levelImageFiles = response.assets[i].files;
+                        LevelEntryData levelEntryData = displayItem.GetComponent<LevelEntryData>();
 
-                    StartCoroutine(LoadLevelIcon(levelImageFiles[0].url.ToString(), levelEntryData.levelIcon));
+                        levelEntryData.id = i;
+                        levelEntryData.levelName = response.assets[i].name;
 
-                    levelEntryData.textFileURL = levelImageFiles[1].url.ToString();
-                }
+                        if (playerID != string.Empty)
+                        {
+                            if (response.assets[i].asset_candidate.created_by_player_id.ToString() == playerIDResponse.payload.value)
+                            {
+                                levelEntryData.EnableDeleteButton();
+                            }
+                        }
+
+                        for (int ii = 0; ii < response.assets[i].storage.Length; ii++)
+                        {
+                            if (response.assets[i].storage[ii].key == "assetID")
+                            {
+                                levelEntryData.assetID = response.assets[i].storage[ii].value;
+                            }
+                        }
+
+                        LootLockerFile[] levelImageFiles = response.assets[i].files;
+
+                        StartCoroutine(LoadLevelIcon(levelImageFiles[0].url.ToString(), levelEntryData.levelIcon));
+
+                        levelEntryData.textFileURL = levelImageFiles[1].url.ToString();
+                    }
+                });
             }
         }, null, true);
     }
@@ -418,28 +476,60 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public void DeleteAllAssets()
-    {
-        LootLockerSDKManager.GetAssetListWithCount(999999, (response) =>
-        {
-            //for (int i = 0; i < response.assets.Length; i++)
-            //{
-            //    LootLockerSDKManager.DeletingAnAssetCandidate(response.assets[i].id, (deleteResponse) =>
-            //    {
-            //        if (deleteResponse.success)
-            //        {
-            //            Debug.Log("Deleted Asset: " + response.assets[i].name);
-            //        }
-            //    });
-            //}
-        }, null, true);
-    }
-
     public void SetRetrieveOwnLevelsOnly(bool _retrieveOwnOnly)
     {
         retrieveOwnLevelsOnly = !_retrieveOwnOnly;
 
         DownloadLevelData();
+    }
+
+    private void DeactiveLevel(string _levelName, string _assetID)
+    {
+        LootLockerSDKManager.GetAssetListWithCount(999999, (response) =>
+        {
+            for (int i = 0; i < response.assets.Length; i++)
+            {
+                if (_levelName == response.assets[i].name)
+                {
+                    for (int ii = 0; ii < response.assets[i].storage.Length; ii++)
+                    {
+                        if (response.assets[i].storage[ii].key == "assetID")
+                        {
+                            if (response.assets[i].storage[ii].value == _assetID)
+                            {
+                                string textFilePath = Application.dataPath + "/" + "Inactive.abc";
+                                if (!Directory.Exists(textFilePath))
+                                {
+                                    File.Create(Application.dataPath + "/" + "Inactive.abc").Dispose();
+                                }
+
+                                LootLocker.LootLockerEnums.FilePurpose textFileType = LootLocker.LootLockerEnums.FilePurpose.file;
+
+                                LootLockerSDKManager.AddingFilesToAssetCandidates(int.Parse(_assetID), textFilePath, "Inactive.abc", textFileType, (response) =>
+                                {
+                                    if (response.success)
+                                    {
+                                        Debug.Log("ADDED FILE");
+                                        for (int i = 0; i < response.asset_candidate.files.Length; i++)
+                                        {
+                                            Debug.Log("File Name: " + response.asset_candidate.files[i].name + "ID: " + response.asset_candidate.files[i].id);
+                                        }
+
+                                        //LootLockerSDKManager.RemovingFilesFromAssetCandidates(int.Parse(_assetID), 1, (response2) =>
+                                        //{
+                                        //    if (response2.success)
+                                        //    {
+                                        //        Debug.Log("Removed File");
+                                        //    }
+                                        //});
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }, null, true);
     }
 
     public void QuitGame()

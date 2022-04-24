@@ -11,6 +11,8 @@ public class LevelEntryData : MonoBehaviour
 {
     public int id;
 
+    public string assetID;
+
     public string levelName;
 
     public string textFileURL;
@@ -18,6 +20,13 @@ public class LevelEntryData : MonoBehaviour
     public Image levelIcon;
 
     [SerializeField] TextMeshProUGUI nameText;
+
+    [SerializeField] GameObject deleteButton;
+
+    private void Awake()
+    {
+        deleteButton.SetActive(false);
+    }
 
     private void Start()
     {
@@ -32,5 +41,15 @@ public class LevelEntryData : MonoBehaviour
     public void LoadLevel()
     {
         EventSystemNew<string>.RaiseEvent(Event_Type.LOAD_LEVEL, textFileURL);
+    }
+
+    public void DeactiveLevel()
+    {
+        EventSystemNew<string, string>.RaiseEvent(Event_Type.DEACTIVATE_LEVEL, levelName, assetID);
+    }
+
+    public void EnableDeleteButton()
+    {
+        deleteButton.SetActive(true);
     }
 }
