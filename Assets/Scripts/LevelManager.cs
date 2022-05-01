@@ -46,17 +46,15 @@ public class LevelManager : MonoBehaviour
 
     string playerName;
 
+    int currentAssetID = -1;
+
     int startPointAdded = 0;
     int finishPointAdded = 0;
 
     bool retrieveOwnLevelsOnly = false;
 
-    System.Action<LootLockerUserGenerateContentResponse> uploadResponse;
-
     private void OnEnable()
     {
-        uploadResponse += CreateLevelData;
-
         EventSystemNew<bool>.Subscribe(Event_Type.LOADING_SCREEN, SetLoadingScreen);
 
         EventSystemNew<string>.Subscribe(Event_Type.LOAD_LEVEL, LoadLevelData);
@@ -71,8 +69,6 @@ public class LevelManager : MonoBehaviour
 
     private void OnDisable()
     {
-        uploadResponse -= CreateLevelData;
-
         EventSystemNew<bool>.Unsubscribe(Event_Type.LOADING_SCREEN, SetLoadingScreen);
 
         EventSystemNew<string>.Unsubscribe(Event_Type.LOAD_LEVEL, LoadLevelData);
@@ -176,23 +172,9 @@ public class LevelManager : MonoBehaviour
             {
                 Debug.Log("Created Asset");
 
-                UploadLevelData(response.asset_candidate_id);
+                UploadLevelData(response.asset_candidate_id, 0);
             }
         });
-    }
-
-    public void CreateLevelData(LootLockerUserGenerateContentResponse response)
-    {
-        if (response.success)
-        {
-            UploadLevelData(response.asset_candidate_id);
-
-            Debug.Log("CandidateID: " + response.asset_candidate_id);
-        }
-        else
-        {
-            Debug.Log("Error asset candidate");
-        }
     }
 
     public void TakeScreenshot()
@@ -227,7 +209,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public void UploadLevelData(int _levelID)
+    public void UploadLevelData(int _levelID, int _versionID)
     {
         string screenshotFilePath = Application.dataPath + "/" + "Level-Screenshot.png";
 
@@ -248,6 +230,7 @@ public class LevelManager : MonoBehaviour
                         Dictionary<string, string> KV = new Dictionary<string, string>();
                         KV.Add("playerName", playerName);
                         KV.Add("assetID", _levelID.ToString());
+                        KV.Add("version", _versionID.ToString());
 
                         LootLockerSDKManager.UpdatingAnAssetCandidate(_levelID, true, (updatedResponse) =>
                         {
