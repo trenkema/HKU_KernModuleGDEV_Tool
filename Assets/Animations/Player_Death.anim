@@ -148,7 +148,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.8888889
-    functionName: RestartLevel
+    functionName: LevelFailed
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

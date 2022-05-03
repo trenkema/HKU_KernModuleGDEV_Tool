@@ -23,9 +23,12 @@ public class LevelEntryData : MonoBehaviour
 
     [SerializeField] GameObject deleteButton;
 
+    [SerializeField] GameObject activateButton;
+
     private void Awake()
     {
         deleteButton.SetActive(false);
+        activateButton.SetActive(false);
     }
 
     private void Start()
@@ -48,8 +51,23 @@ public class LevelEntryData : MonoBehaviour
         EventSystemNew<string>.RaiseEvent(Event_Type.DEACTIVATE_LEVEL, assetID);
     }
 
+    public void ActivateLevel()
+    {
+        EventSystemNew<string>.RaiseEvent(Event_Type.ACTIVATE_LEVEL, assetID);
+    }
+
+    public void FavoriteLevel()
+    {
+        EventSystemNew<string>.RaiseEvent(Event_Type.FAVORITE_LEVEL, assetID);
+    }
+
     public void EnableDeleteButton()
     {
         deleteButton.SetActive(true);
+    }
+
+    public void EnableActivateButton()
+    {
+        activateButton.SetActive(true);
     }
 }

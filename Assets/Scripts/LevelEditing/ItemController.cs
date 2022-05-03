@@ -6,6 +6,8 @@ using TMPro;
 
 public class ItemController : MonoBehaviour
 {
+    [SerializeField] int itemControllerID = 0;
+
     [SerializeField] LevelManagerType levelManagerType;
 
     [SerializeField] GameObject itemDrawer;
@@ -30,11 +32,15 @@ public class ItemController : MonoBehaviour
 
     int activeItemID = 0;
 
+    bool isActive = false;
+
     private void OnEnable()
     {
         EventSystemNew<float>.Subscribe(Event_Type.ROTATE_ITEM, RotateItem);
 
         EventSystemNew.Subscribe(Event_Type.DESTROY_DRAG_IMAGE, DestroyDragImage);
+
+        EventSystemNew<int>.Subscribe(Event_Type.ACTIVATE_ITEM_CONTROLLER, ActivateItemController);
     }
 
     private void OnDisable()
@@ -42,6 +48,8 @@ public class ItemController : MonoBehaviour
         EventSystemNew<float>.Unsubscribe(Event_Type.ROTATE_ITEM, RotateItem);
 
         EventSystemNew.Unsubscribe(Event_Type.DESTROY_DRAG_IMAGE, DestroyDragImage);
+
+        EventSystemNew<int>.Unsubscribe(Event_Type.ACTIVATE_ITEM_CONTROLLER, ActivateItemController);
     }
 
     public void OnHoverEnter()
@@ -101,6 +109,8 @@ public class ItemController : MonoBehaviour
 
     public void ActivateItem()
     {
+        EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, itemControllerID);
+
         StopEditItem();
 
         if (levelManagerType == LevelManagerType.PrefabManager)
@@ -133,7 +143,10 @@ public class ItemController : MonoBehaviour
 
     private void RotateItem(float _rotation)
     {
-        activeDragImage.transform.rotation = Quaternion.Euler(0f, 0f, _rotation);
+        if (isActive)
+        {
+            activeDragImage.transform.rotation = Quaternion.Euler(0f, 0f, _rotation);
+        }
     }
 
     private void DestroyDragImage()
@@ -141,6 +154,18 @@ public class ItemController : MonoBehaviour
         if (activeDragImage != null)
         {
             Destroy(activeDragImage);
+        }
+    }
+
+    private void ActivateItemController(int _itemControllerID)
+    {
+        if (itemControllerID == _itemControllerID)
+        {
+            isActive = true;
+        }
+        else
+        {
+            isActive = false;
         }
     }
 }

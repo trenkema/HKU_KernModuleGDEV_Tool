@@ -17,6 +17,18 @@ public class PlayerController : MonoBehaviour
 
     Rigidbody2D rb;
 
+    bool canDie = true;
+
+    private void OnEnable()
+    {
+        EventSystemNew.Subscribe(Event_Type.CHARACTER_FINISHED, CharacterFinished);
+    }
+
+    private void OnDisable()
+    {
+        EventSystemNew.Unsubscribe(Event_Type.CHARACTER_FINISHED, CharacterFinished);
+    }
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -31,14 +43,19 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger("Death");
     }
 
-    private void RestartLevel()
+    private void CharacterFinished()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        canDie = false;
+    }
+
+    private void LevelFailed()
+    {
+        EventSystemNew.RaiseEvent(Event_Type.LEVEL_FAILED);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Trap"))
+        if (collision.gameObject.CompareTag("Trap") && canDie)
         {
             Die();
         }
@@ -46,7 +63,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Collectable"))
+        if (collision.CompareTag("Collectable") && canDie)
         {
             audioSource.PlayOneShot(collectClip);
 

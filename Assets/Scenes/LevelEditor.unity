@@ -1073,6 +1073,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd80d5ab369d1a84db99eb4bb82c827a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  updateLevelButton: {fileID: 416868851}
   levelNameInputField: {fileID: 673769313}
   missingStartOrFinishUI: {fileID: 219317247}
   editorUI: {fileID: 1648297399}
@@ -6141,10 +6142,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1151539307}
+  - {fileID: 1467352740}
   - {fileID: 1860964925}
   - {fileID: 1451930129}
-  - {fileID: 1467352740}
+  - {fileID: 1151539307}
   m_Father: {fileID: 1648297400}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6724,6 +6725,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeed79d414aefdb43b95192499b4d002, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemControllerID: 3
   levelManagerType: 1
   itemDrawer: {fileID: 1125087808}
   editButton: {fileID: 535186776}
@@ -34887,7 +34889,7 @@ RectTransform:
   - {fileID: 535186777}
   - {fileID: 1264655526}
   m_Father: {fileID: 720997654}
-  m_RootOrder: 0
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -35523,10 +35525,6 @@ MonoBehaviour:
   - {fileID: 7614280536248013125, guid: 5512a5e682ded5849a7830f0feb074b9, type: 3}
   cam: {fileID: 1977635106}
   levelManagerType: 1
-  leftSize: 0
-  rightSize: 0
-  upSize: 0
-  bottomSize: 0
 --- !u!114 &1223279218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35847,6 +35845,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeed79d414aefdb43b95192499b4d002, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemControllerID: 0
   levelManagerType: 0
   itemDrawer: {fileID: 1400839738}
   editButton: {fileID: 401044715}
@@ -38320,7 +38319,7 @@ RectTransform:
   - {fileID: 401044719}
   - {fileID: 1631267368}
   m_Father: {fileID: 720997654}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -45621,6 +45620,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeed79d414aefdb43b95192499b4d002, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemControllerID: 2
   levelManagerType: 1
   itemDrawer: {fileID: 10824280}
   editButton: {fileID: 550338191}
@@ -45692,18 +45692,6 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-        - m_Target: {fileID: 142484131}
-          m_TargetAssemblyTypeName: LevelManager, Assembly-CSharp
-          m_MethodName: OnHoverButton
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
   - eventID: 1
     callback:
       m_PersistentCalls:
@@ -45711,18 +45699,6 @@ MonoBehaviour:
         - m_Target: {fileID: 1950354475}
           m_TargetAssemblyTypeName: ItemController, Assembly-CSharp
           m_MethodName: OnHoverExit
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 142484131}
-          m_TargetAssemblyTypeName: LevelManager, Assembly-CSharp
-          m_MethodName: OnHoverExitButton
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -46063,6 +46039,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeed79d414aefdb43b95192499b4d002, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemControllerID: 1
   levelManagerType: 0
   itemDrawer: {fileID: 339297791}
   editButton: {fileID: 204718923}

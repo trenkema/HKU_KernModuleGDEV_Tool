@@ -21,8 +21,6 @@ public class PrefabLevelEditor : MonoBehaviour
     [Header("Settings")]
     [SerializeField] LevelManagerType levelManagerType;
 
-    [SerializeField] int leftSize, rightSize, upSize, bottomSize;
-
     GameObject selectedPrefab;
 
     bool isActive = false;
@@ -98,43 +96,48 @@ public class PrefabLevelEditor : MonoBehaviour
             {
                 if (!GraphicRaycasterCheck.Instance.IsHittingUI())
                 {
-                    Vector3Int cellPos = tilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+                    PlaceablePrefab placeablePrefab = selectedPrefab.GetComponent<PlaceablePrefab>();
 
-                    Vector3 pos = tilemap.GetCellCenterWorld(cellPos);
-
-                    bool canPlace = CanPlace(cellPos);
-
-                    if (canPlace)
+                    if (placeablePrefab != null)
                     {
-                        if (!placedPrefabsData.ContainsKey(pos))
+                        Vector3Int cellPos = tilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+
+                        Vector3 pos = tilemap.GetCellCenterWorld(cellPos);
+
+                        bool canPlace = CanPlace(cellPos, placeablePrefab.leftSizeGet, placeablePrefab.rightSizeGet, placeablePrefab.upSizeGet, placeablePrefab.bottomSizeGet);
+
+                        if (canPlace)
                         {
-                            Debug.Log("Can Place");
-
-                            GameObject instantiatedPrefab = Instantiate(selectedPrefab, pos, Quaternion.Euler(0f, 0f, currentRotation));
-
-                            placedPrefabs.Add(instantiatedPrefab);
-
-                            int prefabID = 0;
-
-                            for (int i = 0; i < itemPrefabs.Length; i++)
+                            if (!placedPrefabsData.ContainsKey(pos))
                             {
-                                if (selectedPrefab == itemPrefabs[i])
+                                Debug.Log("Can Place");
+
+                                GameObject instantiatedPrefab = Instantiate(selectedPrefab, pos, Quaternion.Euler(0f, 0f, currentRotation));
+
+                                placedPrefabs.Add(instantiatedPrefab);
+
+                                int prefabID = 0;
+
+                                for (int i = 0; i < itemPrefabs.Length; i++)
                                 {
-                                    prefabID = i;
+                                    if (selectedPrefab == itemPrefabs[i])
+                                    {
+                                        prefabID = i;
+                                    }
                                 }
+
+                                PrefabPlacedData placedData = new PrefabPlacedData();
+
+                                placedData.prefabID = prefabID;
+                                placedData.zRotation = currentRotation;
+
+                                placedPrefabsData.Add(pos, placedData);
                             }
-
-                            PrefabPlacedData placedData = new PrefabPlacedData();
-
-                            placedData.prefabID = prefabID;
-                            placedData.zRotation = currentRotation;
-
-                            placedPrefabsData.Add(pos, placedData);
                         }
-                    }
-                    else
-                    {
-                        Debug.Log("Can't Place");
+                        else
+                        {
+                            Debug.Log("Can't Place");
+                        }
                     }
                 }
             }
@@ -195,35 +198,71 @@ public class PrefabLevelEditor : MonoBehaviour
         }
     }
 
-    private void EquipTile()
-    {
-
-    }
-
-    private bool CanPlace(Vector3Int _pos)
+    private bool CanPlace(Vector3Int _pos, int _leftSize, int _rightSize, int _upSize, int _bottomSize)
     {
         Vector3Int tempPos = _pos;
 
-        // Check Initial Position
-        if (tilemap.GetTile<TileBase>(tempPos) != null)
-            return false;
-        // Check Left
-        tempPos.x -= leftSize;
-        if (tilemap.GetTile<TileBase>(tempPos) != null)
-            return false;
-        // Check Right
-        tempPos.x += leftSize + rightSize;
-        if (tilemap.GetTile<TileBase>(tempPos) != null)
-            return false;
-        // Check Up
+        for (int x = -1; x < _leftSize; x++)
+        {
+            for (int y = -1; y < _upSize; y++)
+            {
+                if (tilemap.GetTile<TileBase>(tempPos) != null)
+                    return false;
+
+                tempPos.y++;
+            }
+
+            tempPos.y = _pos.y;
+            tempPos.x--;
+        }
+
         tempPos = _pos;
-        tempPos.y += upSize;
-        if (tilemap.GetTile<TileBase>(tempPos) != null)
-            return false;
-        // Check Down
-        tempPos.y -= upSize + bottomSize;
-        if (tilemap.GetTile<TileBase>(tempPos) != null)
-            return false;
+
+        for (int x = -1; x < _leftSize; x++)
+        {
+            for (int y = -1; y < _bottomSize; y++)
+            {
+                if (tilemap.GetTile<TileBase>(tempPos) != null)
+                    return false;
+
+                tempPos.y--;
+            }
+
+            tempPos.y = _pos.y;
+            tempPos.x--;
+        }
+
+        tempPos = _pos;
+
+        for (int x = -1; x < _rightSize; x++)
+        {
+            for (int y = -1; y < _upSize; y++)
+            {
+                if (tilemap.GetTile<TileBase>(tempPos) != null)
+                    return false;
+
+                tempPos.y++;
+            }
+
+            tempPos.y = _pos.y;
+            tempPos.x++;
+        }
+
+        tempPos = _pos;
+
+        for (int x = -1; x < _rightSize; x++)
+        {
+            for (int y = -1; y < _bottomSize; y++)
+            {
+                if (tilemap.GetTile<TileBase>(tempPos) != null)
+                    return false;
+
+                tempPos.y--;
+            }
+
+            tempPos.y = _pos.y;
+            tempPos.x++;
+        }
 
         return true;
     }

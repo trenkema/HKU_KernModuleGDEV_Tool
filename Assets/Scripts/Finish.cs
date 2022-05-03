@@ -43,6 +43,8 @@ public class Finish : MonoBehaviour
 
             audioSource.PlayOneShot(finishClip);
 
+            EventSystemNew.RaiseEvent(Event_Type.CHARACTER_FINISHED);
+
             Invoke("CompleteLevel", completeDelayTime);
         }
     }
