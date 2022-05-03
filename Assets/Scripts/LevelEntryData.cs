@@ -40,12 +40,12 @@ public class LevelEntryData : MonoBehaviour
 
     public void LoadLevel()
     {
-        EventSystemNew<string>.RaiseEvent(Event_Type.LOAD_LEVEL, textFileURL);
+        EventSystemNew<string, LevelEntryData>.RaiseEvent(Event_Type.LOAD_LEVEL, textFileURL, this);
     }
 
     public void DeactiveLevel()
     {
-        EventSystemNew<string, string>.RaiseEvent(Event_Type.DEACTIVATE_LEVEL, levelName, assetID);
+        EventSystemNew<string>.RaiseEvent(Event_Type.DEACTIVATE_LEVEL, assetID);
     }
 
     public void EnableDeleteButton()

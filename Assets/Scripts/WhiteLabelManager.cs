@@ -10,6 +10,10 @@ public class WhiteLabelManager : MonoBehaviour
 
     [SerializeField] GameObject logoutButton;
 
+    [SerializeField] GameObject mainMenuTopText;
+
+    [SerializeField] GameObject authenticationButtons;
+
     [SerializeField] GameObject authenticationUI;
     [SerializeField] GameObject loginUI;
     [SerializeField] GameObject registerUI;
@@ -76,6 +80,8 @@ public class WhiteLabelManager : MonoBehaviour
 
                         authenticationUI.SetActive(false);
                         mainMenuUI.SetActive(true);
+
+                        mainMenuTopText.SetActive(false);
                     }
                 });
             }
@@ -99,9 +105,14 @@ public class WhiteLabelManager : MonoBehaviour
             loggedInNameText.gameObject.SetActive(false);
             selectModeUI.SetActive(false);
             mainMenuUI.SetActive(false);
+
+            mainMenuTopText.SetActive(true);
+
             authenticationUI.SetActive(true);
+            authenticationButtons.SetActive(true);
+
             registerUI.SetActive(false);
-            loginUI.SetActive(true);
+            loginUI.SetActive(false);
 
             Debug.Log("Account Created");
         });
