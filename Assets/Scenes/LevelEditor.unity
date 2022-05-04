@@ -35514,7 +35514,7 @@ MonoBehaviour:
   tilemap: {fileID: 1581283437}
   prefabsLayers:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 640
   itemPrefabs:
   - {fileID: 5620118928294185442, guid: 457d5397b417d92429ce5de88304851a, type: 3}
   - {fileID: 120826848553102788, guid: d370ee7a96438cb46adfc1fdbd1e5c21, type: 3}

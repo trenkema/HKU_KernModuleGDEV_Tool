@@ -31,7 +31,10 @@ public class WhiteLabelManager : MonoBehaviour
     [SerializeField] TMP_InputField existingEmailInputField;
     [SerializeField] TMP_InputField existingPasswordInputField;
 
-    [SerializeField] TextMeshProUGUI errorText;
+    [SerializeField] TextMeshProUGUI loginErrorText;
+    [SerializeField] TextMeshProUGUI registerErrorText;
+
+    int playerDatabaseID = 2559;
 
     string playerName = "";
 
@@ -120,7 +123,7 @@ public class WhiteLabelManager : MonoBehaviour
 
     public void Login()
     {
-        errorText.gameObject.SetActive(false);
+        loginErrorText.gameObject.SetActive(false);
 
         string email = existingEmailInputField.text;
         string password = existingPasswordInputField.text;
@@ -129,8 +132,8 @@ public class WhiteLabelManager : MonoBehaviour
         {
             if (!response.success)
             {
-                errorText.gameObject.SetActive(true);
-                errorText.text = "Check login info";
+                loginErrorText.gameObject.SetActive(true);
+                loginErrorText.text = "Check login info";
 
                 Debug.Log("Error Logging In");
                 return;
@@ -167,53 +170,41 @@ public class WhiteLabelManager : MonoBehaviour
 
     public void NewUser()
     {
-        errorText.gameObject.SetActive(false);
+        registerErrorText.gameObject.SetActive(false);
 
         string email = newEmailInputField.text;
         string password = newPasswordInputField.text;
         string username = newUsernameInputField.text;
 
-        LootLockerSDKManager.WhiteLabelSignUp(email, password, (response) =>
+        LootLockerSDKManager.StartGuestSession((response) =>
         {
             if (!response.success)
             {
-                errorText.gameObject.SetActive(true);
-                errorText.text = "Check create info";
-
                 Error(response.Error);
+
                 return;
             }
-            else
-            {
-                LootLockerSDKManager.WhiteLabelLogin(email, password, true, response =>
-                {
-                    if (!response.success)
-                    {
-                        Error(response.Error);
-                        return;
-                    }
 
-                    LootLockerSDKManager.StartWhiteLabelSession((response) =>
+            LootLockerSDKManager.GetScoreList(playerDatabaseID, 2000, (levelListResponse) =>
+            {
+                if (levelListResponse.statusCode == 200)
+                {
+                    for (int i = 0; i < levelListResponse.items.Length; i++)
                     {
-                        if (!response.success)
+                        if (levelListResponse.items[i].member_id == username)
                         {
-                            Error(response.Error);
+                            registerErrorText.gameObject.SetActive(true);
+
+                            registerErrorText.text = "User already exists";
+
                             return;
                         }
+                    }
 
-                        if (username == string.Empty)
+                    LootLockerSDKManager.SubmitScore(username, 0, playerDatabaseID, (scoreResponse) =>
+                    {
+                        if (scoreResponse.statusCode == 200)
                         {
-                            username = response.public_uid;
-                        }
-
-                        LootLockerSDKManager.SetPlayerName(username, (response) =>
-                        {
-                            if (!response.success)
-                            {
-                                Error(response.Error);
-                                return;
-                            }
-
                             LootLockerSessionRequest sessionRequest = new LootLockerSessionRequest();
 
                             LootLocker.LootLockerAPIManager.EndSession(sessionRequest, (response) =>
@@ -224,15 +215,72 @@ public class WhiteLabelManager : MonoBehaviour
                                     return;
                                 }
 
-                                registerUI.SetActive(false);
-                                loginUI.SetActive(true);
+                                LootLockerSDKManager.WhiteLabelSignUp(email, password, (response) =>
+                                {
+                                    if (!response.success)
+                                    {
+                                        registerErrorText.gameObject.SetActive(true);
+                                        registerErrorText.text = "Check create info";
 
-                                Debug.Log("Account Created");
+                                        Error(response.Error);
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        LootLockerSDKManager.WhiteLabelLogin(email, password, true, response =>
+                                        {
+                                            if (!response.success)
+                                            {
+                                                Error(response.Error);
+                                                return;
+                                            }
+
+                                            LootLockerSDKManager.StartWhiteLabelSession((response) =>
+                                            {
+                                                if (!response.success)
+                                                {
+                                                    Error(response.Error);
+                                                    return;
+                                                }
+
+                                                if (username == string.Empty)
+                                                {
+                                                    username = response.public_uid;
+                                                }
+
+                                                LootLockerSDKManager.SetPlayerName(username, (response) =>
+                                                {
+                                                    if (!response.success)
+                                                    {
+                                                        Error(response.Error);
+                                                        return;
+                                                    }
+
+                                                    LootLockerSessionRequest sessionRequest = new LootLockerSessionRequest();
+
+                                                    LootLocker.LootLockerAPIManager.EndSession(sessionRequest, (response) =>
+                                                    {
+                                                        if (!response.success)
+                                                        {
+                                                            Error(response.Error);
+                                                            return;
+                                                        }
+
+                                                        registerUI.SetActive(false);
+                                                        loginUI.SetActive(true);
+
+                                                        Debug.Log("Account Created");
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    }
+                                });
                             });
-                        });
+                        }
                     });
-                });
-            }
+                }
+            });
         });
     }
 

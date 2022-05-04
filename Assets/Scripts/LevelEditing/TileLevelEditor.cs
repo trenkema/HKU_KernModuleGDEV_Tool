@@ -79,9 +79,12 @@ public class TileLevelEditor : MonoBehaviour
         {
             if (!GraphicRaycasterCheck.Instance.IsHittingUI())
             {
-                Vector3Int pos = currentTilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+                if (currentTilemap.name != Tilemaps.Background.ToString())
+                {
+                    Vector3Int pos = currentTilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
 
-                DeleteTile(pos);
+                    DeleteTile(pos);
+                }
             }
         }
     }

@@ -36,6 +36,8 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
+        EventSystemNew.RaiseEvent(Event_Type.CHARACTER_DIED);
+
         audioSource.PlayOneShot(deathClip);
 
         rb.bodyType = RigidbodyType2D.Static;

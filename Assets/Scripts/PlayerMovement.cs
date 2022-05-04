@@ -19,6 +19,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] AudioSource audioSource;
 
     [Header("Settings")]
+    [SerializeField] float wallJumpTime = 0.08f;
+
+    [SerializeField] float wallJumpCooldown = 0.1f;
+
     [SerializeField] float moveSpeed = 7f;
 
     [SerializeField] float smoothInputSpeed = 0.2f;
@@ -38,14 +42,33 @@ public class PlayerMovement : MonoBehaviour
 
     bool canMove = true;
 
+    bool isTouchingLeft = false;
+    bool isTouchingRight = false;
+
+    float touchingLeftOrRight = 0;
+
+    float lastJumpedSide = 0;
+
+    bool isWallJumping = false;
+
+    bool canWallJump = true;
+
+    bool isWallJumpingEnabled = true;
+
+    bool hasDied = false;
+
     private void OnEnable()
     {
         EventSystemNew.Subscribe(Event_Type.LEVEL_COMPLETED, LevelCompleted);
+
+        EventSystemNew.Subscribe(Event_Type.CHARACTER_DIED, CharacterDied);
     }
 
     private void OnDisable()
     {
         EventSystemNew.Unsubscribe(Event_Type.LEVEL_COMPLETED, LevelCompleted);
+
+        EventSystemNew.Unsubscribe(Event_Type.CHARACTER_DIED, CharacterDied);
     }
 
     private void Awake()
@@ -56,17 +79,61 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        UpdateAnimationState();
+        if (!hasDied)
+        {
+            UpdateAnimationState();
+
+            if (isWallJumpingEnabled)
+            {
+                isTouchingLeft = Physics2D.OverlapBox(new Vector2(gameObject.transform.position.x - (coll.bounds.size.x / 2), gameObject.transform.position.y), new Vector2(0.25f, 1f), 0f, groundLayers);
+                isTouchingRight = Physics2D.OverlapBox(new Vector2(gameObject.transform.position.x + (coll.bounds.size.x / 2), gameObject.transform.position.y), new Vector2(0.25f, 1f), 0f, groundLayers);
+
+                if (isTouchingLeft)
+                {
+                    touchingLeftOrRight = 1;
+
+                    if (!canWallJump && lastJumpedSide == -1)
+                    {
+                        lastJumpedSide = 1;
+
+                        CancelInvoke(nameof(SetCanWallJump));
+
+                        canWallJump = true;
+                    }
+                }
+                else if (isTouchingRight)
+                {
+                    touchingLeftOrRight = -1;
+
+                    if (!canWallJump && lastJumpedSide == 1)
+                    {
+                        lastJumpedSide = -1;
+
+                        CancelInvoke(nameof(SetCanWallJump));
+
+                        canWallJump = true;
+                    }
+                }
+            }
+        }
     }
 
     private void FixedUpdate()
     {
-        Move();
-    }
+        if (!hasDied)
+        {
+            if (isWallJumpingEnabled)
+            {
+                if (isWallJumping)
+                {
+                    lastJumpedSide = touchingLeftOrRight;
 
-    private void LevelCompleted()
-    {
-        canMove = false;
+                    rb.velocity = new Vector2(moveSpeed * touchingLeftOrRight, jumpForce / 2);
+                }
+            }
+
+            Move();
+        }
     }
 
     private void UpdateAnimationState()
@@ -94,20 +161,23 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move()
     {
-        if (!isMoving)
+        if (!isWallJumping)
         {
-            curMovementInput = Vector2.SmoothDamp(curMovementInput, Vector2.zero, ref smoothInputVelocity, smoothInputSpeed);
-        }
+            if (!isMoving)
+            {
+                curMovementInput = Vector2.SmoothDamp(curMovementInput, Vector2.zero, ref smoothInputVelocity, smoothInputSpeed);
+            }
 
-        rb.velocity = new Vector2(curMovementInput.x * moveSpeed, rb.velocity.y);
+            rb.velocity = new Vector2(curMovementInput.x * moveSpeed, rb.velocity.y);
 
-        if (curMovementInput.x < 0f)
-        {
-            sprite.flipX = true;
-        }
-        else if (curMovementInput.x > 0f)
-        {
-            sprite.flipX = false;
+            if (curMovementInput.x < 0f)
+            {
+                sprite.flipX = true;
+            }
+            else if (curMovementInput.x > 0f)
+            {
+                sprite.flipX = false;
+            }
         }
     }
 
@@ -127,16 +197,57 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext _context)
     {
-        if (_context.phase == InputActionPhase.Started && IsGrounded() && canMove)
+        if (_context.phase == InputActionPhase.Started && IsGrounded() && canMove && !hasDied)
         {
             audioSource.PlayOneShot(jumpClip);
 
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
+        else if (_context.phase == InputActionPhase.Started && !IsGrounded() && canMove && (isTouchingLeft || isTouchingRight) && isWallJumpingEnabled && !hasDied)
+        {
+            if (canWallJump)
+            {
+                canWallJump = false;
+
+                isWallJumping = true;
+
+                Invoke(nameof(SetCanWallJump), wallJumpCooldown);
+
+                Invoke(nameof(SetWallJumpingToFalse), wallJumpTime);
+            }
+        }
+    }
+
+    private void SetCanWallJump()
+    {
+        canWallJump = true;
+    }
+
+    private void SetWallJumpingToFalse()
+    {
+        isWallJumping = false;
     }
 
     private bool IsGrounded()
     {
         return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .1f, groundLayers);
     }
+
+    private void LevelCompleted()
+    {
+        canMove = false;
+    }
+
+    private void CharacterDied()
+    {
+        hasDied = true;
+    }
+
+    //private void OnDrawGizmosSelected()
+    //{
+    //    // Wall Jumping Colliders
+    //    Gizmos.color = Color.green;
+    //    Gizmos.DrawCube(new Vector2(gameObject.transform.position.x - (coll.bounds.size.x / 2), gameObject.transform.position.y), new Vector2(0.25f, 1f));
+    //    Gizmos.DrawCube(new Vector2(gameObject.transform.position.x + (coll.bounds.size.x / 2), gameObject.transform.position.y), new Vector2(0.25f, 1f));
+    //}
 }

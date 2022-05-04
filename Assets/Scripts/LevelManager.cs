@@ -217,6 +217,10 @@ public class LevelManager : MonoBehaviour
                                 }
                             });
                         }
+                        else
+                        {
+                            EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
+                        }
                     }
                 });
             }
@@ -470,7 +474,7 @@ public class LevelManager : MonoBehaviour
                             {
                                 LootLockerCommonAsset asset = response.assets[levelListResponse.items[i].score];
 
-                                if (levelListResponse.items[i].metadata != "-1" || asset.asset_candidate.created_by_player_id.ToString() == playerIDResponse.payload.value)
+                                if (levelListResponse.items[i].metadata != "-1" || asset.asset_candidate.created_by_player_id.ToString() == playerID)
                                 {
                                     GameObject displayItem = Instantiate(levelEntryDisplayItem, transform.position, Quaternion.identity);
 

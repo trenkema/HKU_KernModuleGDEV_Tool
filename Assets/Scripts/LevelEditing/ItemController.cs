@@ -82,6 +82,8 @@ public class ItemController : MonoBehaviour
 
     public void SelectItem(int _itemID)
     {
+        EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, itemControllerID);
+
         StopEditItem();
 
         activeItemID = _itemID;
