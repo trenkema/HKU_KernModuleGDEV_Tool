@@ -44,6 +44,7 @@ public class WhiteLabelManager : MonoBehaviour
 
         loggedInNameText.gameObject.SetActive(false);
         authenticationUI.SetActive(false);
+        authenticationButtons.SetActive(false);
         mainMenuUI.SetActive(false);
 
         CheckForPreviousSession();
@@ -56,14 +57,22 @@ public class WhiteLabelManager : MonoBehaviour
             if (!response)
             {
                 authenticationUI.SetActive(true);
+                authenticationButtons.SetActive(true);
+
+                mainMenuTopText.SetActive(true);
             }
-            else
+            else if (response)
             {
                 LootLockerSDKManager.StartWhiteLabelSession((response) =>
                 {
                     if (!response.success)
                     {
+                        Error(response.Error);
+
                         authenticationUI.SetActive(true);
+                        authenticationButtons.SetActive(true);
+
+                        mainMenuTopText.SetActive(true);
 
                         Debug.Log("Error Starting Session");
                         return;
@@ -82,6 +91,7 @@ public class WhiteLabelManager : MonoBehaviour
                         logoutButton.SetActive(true);
 
                         authenticationUI.SetActive(false);
+                        authenticationButtons.SetActive(false);
                         mainMenuUI.SetActive(true);
 
                         mainMenuTopText.SetActive(false);
@@ -93,9 +103,7 @@ public class WhiteLabelManager : MonoBehaviour
 
     public void Logout()
     {
-        LootLockerSessionRequest sessionRequest = new LootLockerSessionRequest();
-
-        LootLocker.LootLockerAPIManager.EndSession(sessionRequest, (response) =>
+        LootLockerSDKManager.EndSession((response) =>
         {
             if (!response.success)
             {
@@ -205,9 +213,7 @@ public class WhiteLabelManager : MonoBehaviour
                     {
                         if (scoreResponse.statusCode == 200)
                         {
-                            LootLockerSessionRequest sessionRequest = new LootLockerSessionRequest();
-
-                            LootLocker.LootLockerAPIManager.EndSession(sessionRequest, (response) =>
+                            LootLockerSDKManager.EndSession((response) =>
                             {
                                 if (!response.success)
                                 {
@@ -256,9 +262,7 @@ public class WhiteLabelManager : MonoBehaviour
                                                         return;
                                                     }
 
-                                                    LootLockerSessionRequest sessionRequest = new LootLockerSessionRequest();
-
-                                                    LootLocker.LootLockerAPIManager.EndSession(sessionRequest, (response) =>
+                                                    LootLockerSDKManager.EndSession((response) =>
                                                     {
                                                         if (!response.success)
                                                         {

@@ -178,7 +178,7 @@ MonoBehaviour:
   jumpClip: {fileID: 8300000, guid: 29bde6326b4c34ad8a12da475f79b50a, type: 3}
   audioSource: {fileID: 5649412278859294693}
   wallJumpTime: 0.08
-  wallJumpCooldown: 2
+  wallJumpCooldown: 0.65
   moveSpeed: 7
   smoothInputSpeed: 0.05
   jumpForce: 14

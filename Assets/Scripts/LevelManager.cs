@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
 using UnityEditor;
-using LootLocker.Admin;
 
 public enum LevelManagerType
 {
