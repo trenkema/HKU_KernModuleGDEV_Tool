@@ -84,6 +84,8 @@ public class ItemController : MonoBehaviour
     {
         EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, itemControllerID);
 
+        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, false);
+
         StopEditItem();
 
         activeItemID = _itemID;
@@ -112,6 +114,8 @@ public class ItemController : MonoBehaviour
     public void ActivateItem()
     {
         EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, itemControllerID);
+
+        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, false);
 
         StopEditItem();
 

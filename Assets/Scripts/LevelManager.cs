@@ -10,6 +10,7 @@ using UnityEditor;
 
 public enum LevelManagerType
 {
+    None,
     TileManager,
     PrefabManager
 }

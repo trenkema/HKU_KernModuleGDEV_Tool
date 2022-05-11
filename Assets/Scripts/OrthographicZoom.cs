@@ -5,6 +5,10 @@ using UnityEngine.InputSystem;
 
 public class OrthographicZoom : MonoBehaviour
 {
+    [SerializeField] GameObject hoverText;
+
+    [SerializeField] GameObject crossIcon;
+
     [SerializeField] Camera cam;
 
     [SerializeField] float maxZoom = 5f;
@@ -15,7 +19,7 @@ public class OrthographicZoom : MonoBehaviour
 
     [SerializeField] float speed = 25f;
 
-    [SerializeField] float minX, maxX, minZ, maxZ;
+    [SerializeField] float minX, maxX, minY, maxY;
 
     [SerializeField] bool clampPosition = true;
 
@@ -29,6 +33,16 @@ public class OrthographicZoom : MonoBehaviour
 
     float startZoom;
 
+    private void OnEnable()
+    {
+        EventSystemNew<bool>.Subscribe(Event_Type.TOGGLE_DRAGGING, ToggleDrag);
+    }
+
+    private void OnDisable()
+    {
+        EventSystemNew<bool>.Unsubscribe(Event_Type.TOGGLE_DRAGGING, ToggleDrag);
+    }
+
     private void Start()
     {
         startZoom = cam.orthographicSize;
@@ -41,6 +55,8 @@ public class OrthographicZoom : MonoBehaviour
         float newSize = Mathf.MoveTowards(cam.orthographicSize, targetZoom, speed * Time.deltaTime);
         cam.orthographicSize = newSize;
 
+        cam.gameObject.transform.position = ClampCamera(cam.gameObject.transform.position);
+
         if (canDrag && isDragging)
         {
             Debug.Log("Panning Camera");
@@ -49,6 +65,16 @@ public class OrthographicZoom : MonoBehaviour
 
             cam.gameObject.transform.position = ClampCamera(cam.gameObject.transform.position + difference);
         }
+    }
+
+    public void OnHoverEnter()
+    {
+        hoverText.SetActive(true);
+    }
+
+    public void OnHoverExit()
+    {
+        hoverText.SetActive(false);
     }
 
     public void PanClickedCamera(InputAction.CallbackContext context)
@@ -78,13 +104,13 @@ public class OrthographicZoom : MonoBehaviour
 
             float newMinX = minX + camWidth;
             float newMaxX = maxX - camWidth;
-            float newMinZ = minZ + camHeight;
-            float newMaxZ = maxZ - camHeight;
+            float newMinY = minY + camHeight;
+            float newMaxY = maxY - camHeight;
 
             float newX = Mathf.Clamp(_targetPosition.x, newMinX, newMaxX);
-            float newZ = Mathf.Clamp(_targetPosition.z, newMinZ, newMaxZ);
+            float newY = Mathf.Clamp(_targetPosition.y, newMinY, newMaxY);
 
-            return new Vector3(newX, newZ, -10f);
+            return new Vector3(newX, newY, -10f);
         }
 
         return new Vector3(_targetPosition.x, _targetPosition.y, -10f);
@@ -93,6 +119,22 @@ public class OrthographicZoom : MonoBehaviour
     public void ToggleDrag()
     {
         canDrag = !canDrag;
+
+        crossIcon.SetActive(canDrag ? false : true);
+
+        if (canDrag)
+        {
+            EventSystemNew.RaiseEvent(Event_Type.DESTROY_DRAG_IMAGE);
+            EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, -1);
+            EventSystemNew<LevelManagerType>.RaiseEvent(Event_Type.ENABLE_LEVEL_EDITOR, LevelManagerType.None);
+        }
+    }
+
+    public void ToggleDrag(bool _canDrag)
+    {
+        canDrag = _canDrag;
+
+        crossIcon.SetActive(canDrag ? false : true);
     }
 
     public void ResetCamera()

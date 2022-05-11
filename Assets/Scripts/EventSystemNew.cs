@@ -31,7 +31,9 @@ public enum Event_Type
     CHARACTER_FINISHED,
     CHARACTER_DIED,
 
-    ASSET_ID
+    ASSET_ID,
+
+    TOGGLE_DRAGGING
 }
 
 public static class EventSystemNew
