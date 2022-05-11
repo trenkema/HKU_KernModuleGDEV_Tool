@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.lootlocker.lootlockersdk": {
-      "version": "file:C:/Users/tomre/Downloads/lootlocker-sdk/unity-sdk-main",
+      "version": "file:C:/Users/tomre/Downloads/lootlockerSDK_1.1.19",
       "depth": 0,
       "source": "local",
       "dependencies": {
