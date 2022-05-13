@@ -34,6 +34,8 @@ public class ItemController : MonoBehaviour
 
     bool isActive = false;
 
+    bool canPlace = true;
+
     private void OnEnable()
     {
         EventSystemNew<float>.Subscribe(Event_Type.ROTATE_ITEM, RotateItem);
@@ -41,6 +43,10 @@ public class ItemController : MonoBehaviour
         EventSystemNew.Subscribe(Event_Type.DESTROY_DRAG_IMAGE, DestroyDragImage);
 
         EventSystemNew<int>.Subscribe(Event_Type.ACTIVATE_ITEM_CONTROLLER, ActivateItemController);
+
+        EventSystemNew.Subscribe(Event_Type.STOP_ITEMS, StopItem);
+
+        EventSystemNew<bool>.Subscribe(Event_Type.DRAGGING, DraggingLevel);
     }
 
     private void OnDisable()
@@ -50,6 +56,10 @@ public class ItemController : MonoBehaviour
         EventSystemNew.Unsubscribe(Event_Type.DESTROY_DRAG_IMAGE, DestroyDragImage);
 
         EventSystemNew<int>.Unsubscribe(Event_Type.ACTIVATE_ITEM_CONTROLLER, ActivateItemController);
+
+        EventSystemNew.Unsubscribe(Event_Type.STOP_ITEMS, StopItem);
+
+        EventSystemNew<bool>.Unsubscribe(Event_Type.DRAGGING, DraggingLevel);
     }
 
     public void OnHoverEnter()
@@ -78,6 +88,13 @@ public class ItemController : MonoBehaviour
         editButton.SetActive(true);
 
         stopEditButton.SetActive(false);
+    }
+
+    private void StopItem()
+    {
+        EventSystemNew.RaiseEvent(Event_Type.DESTROY_DRAG_IMAGE);
+        EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, -1);
+        EventSystemNew<LevelManagerType>.RaiseEvent(Event_Type.ENABLE_LEVEL_EDITOR, LevelManagerType.None);
     }
 
     public void SelectItem(int _itemID)
@@ -115,7 +132,7 @@ public class ItemController : MonoBehaviour
     {
         EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, itemControllerID);
 
-        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, false);
+        //EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, false);
 
         StopEditItem();
 
@@ -172,6 +189,18 @@ public class ItemController : MonoBehaviour
         else
         {
             isActive = false;
+        }
+    }
+
+    private void DraggingLevel(bool _isDragging)
+    {
+        if (_isDragging && isActive)
+        {
+            activeDragImage.SetActive(false);
+        }
+        else if (!_isDragging && isActive)
+        {
+            activeDragImage.SetActive(true);
         }
     }
 }

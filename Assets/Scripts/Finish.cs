@@ -7,6 +7,8 @@ public class Finish : MonoBehaviour
 {
     [SerializeField] float completeDelayTime = 2f;
 
+    [SerializeField] Animator animator;
+
     [SerializeField] AudioClip finishClip;
 
     [SerializeField] AudioSource audioSource;
@@ -40,6 +42,8 @@ public class Finish : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && !levelCompleted && gameStarted)
         {
             levelCompleted = true;
+
+            animator.SetBool("Finished", true);
 
             audioSource.PlayOneShot(finishClip);
 

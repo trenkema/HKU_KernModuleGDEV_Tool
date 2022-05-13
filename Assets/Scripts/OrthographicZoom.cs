@@ -81,17 +81,24 @@ public class OrthographicZoom : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Started)
         {
-            Debug.Log("Can Drag");
+            if (canDrag)
+            {
+                Debug.Log("Dragging");
 
-            isDragging = true;
+                isDragging = true;
 
-            dragOrigin = cam.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+                EventSystemNew<bool>.RaiseEvent(Event_Type.DRAGGING, true);
+
+                dragOrigin = cam.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            }
         }
         else if (context.phase == InputActionPhase.Canceled)
         {
-            Debug.Log("Can't Drag");
+            Debug.Log("Stopped Dragging");
 
             isDragging = false;
+
+            EventSystemNew<bool>.RaiseEvent(Event_Type.DRAGGING, false);
         }
     }
 
@@ -124,9 +131,7 @@ public class OrthographicZoom : MonoBehaviour
 
         if (canDrag)
         {
-            EventSystemNew.RaiseEvent(Event_Type.DESTROY_DRAG_IMAGE);
-            EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, -1);
-            EventSystemNew<LevelManagerType>.RaiseEvent(Event_Type.ENABLE_LEVEL_EDITOR, LevelManagerType.None);
+            EventSystemNew.RaiseEvent(Event_Type.STOP_ITEMS);
         }
     }
 

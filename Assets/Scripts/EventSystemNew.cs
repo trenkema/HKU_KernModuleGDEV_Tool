@@ -33,7 +33,11 @@ public enum Event_Type
 
     ASSET_ID,
 
-    TOGGLE_DRAGGING
+    TOGGLE_DRAGGING,
+    STOP_ITEMS,
+    DRAGGING,
+
+    PLAYER_TRANSFORM
 }
 
 public static class EventSystemNew

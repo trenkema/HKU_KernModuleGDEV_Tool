@@ -47,12 +47,16 @@ public class TileLevelEditor : MonoBehaviour
 
     bool isHovering = false;
 
+    bool isDragging = true;
+
     private void OnEnable()
     {
         EventSystemNew<CustomTile>.Subscribe(Event_Type.EQUIP_TILE, EquipTile);
         EventSystemNew<LevelManagerType>.Subscribe(Event_Type.ENABLE_LEVEL_EDITOR, EnableLevelEditor);
 
         EventSystemNew.Subscribe(Event_Type.GAME_STARTED, GameStarted);
+
+        EventSystemNew<bool>.Subscribe(Event_Type.DRAGGING, DraggingLevel);
     }
 
     private void OnDisable()
@@ -61,6 +65,8 @@ public class TileLevelEditor : MonoBehaviour
         EventSystemNew<LevelManagerType>.Unsubscribe(Event_Type.ENABLE_LEVEL_EDITOR, EnableLevelEditor);
 
         EventSystemNew.Unsubscribe(Event_Type.GAME_STARTED, GameStarted);
+
+        EventSystemNew<bool>.Unsubscribe(Event_Type.DRAGGING, DraggingLevel);
     }
 
     private void Update()
@@ -108,7 +114,7 @@ public class TileLevelEditor : MonoBehaviour
 
     public void OnPlaceTile(InputAction.CallbackContext _callbackContext)
     {
-        if (isActive && !isHovering)
+        if (isActive && !isHovering && !isDragging)
         {
             if (_callbackContext.phase == InputActionPhase.Started)
             {
@@ -123,7 +129,7 @@ public class TileLevelEditor : MonoBehaviour
 
     public void OnDeleteTile(InputAction.CallbackContext _callbackContext)
     {
-        if (isActive && !isHovering)
+        if (isActive && !isHovering && !isDragging)
         {
             if (_callbackContext.phase == InputActionPhase.Performed)
             {
@@ -155,5 +161,10 @@ public class TileLevelEditor : MonoBehaviour
     void DeleteTile(Vector3Int _pos)
     {
         currentTilemap.SetTile(_pos, null);
+    }
+
+    private void DraggingLevel(bool _isDragging)
+    {
+        isDragging = _isDragging;
     }
 }

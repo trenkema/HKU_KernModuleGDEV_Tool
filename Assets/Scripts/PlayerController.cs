@@ -9,6 +9,9 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     [SerializeField] Animator animator;
 
+    [Header("Settings")]
+    [SerializeField] float deathZoneY = -200f;
+
     [Header("Audio")]
     [SerializeField] AudioClip collectClip;
     [SerializeField] AudioClip deathClip;
@@ -18,6 +21,8 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D rb;
 
     bool canDie = true;
+
+    bool hasDied = false;
 
     private void OnEnable()
     {
@@ -34,15 +39,31 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
     }
 
+    private void Update()
+    {
+        if (!hasDied)
+        {
+            if (transform.position.y <= deathZoneY)
+            {
+                Die();
+            }
+        }
+    }
+
     private void Die()
     {
-        EventSystemNew.RaiseEvent(Event_Type.CHARACTER_DIED);
+        if (!hasDied)
+        {
+            hasDied = true;
 
-        audioSource.PlayOneShot(deathClip);
+            EventSystemNew.RaiseEvent(Event_Type.CHARACTER_DIED);
 
-        rb.bodyType = RigidbodyType2D.Static;
+            audioSource.PlayOneShot(deathClip);
 
-        animator.SetTrigger("Death");
+            rb.bodyType = RigidbodyType2D.Static;
+
+            animator.SetTrigger("Death");
+        }
     }
 
     private void CharacterFinished()

@@ -72,6 +72,8 @@ public class StartPoint : MonoBehaviour
 
         spawnedPlayer = Instantiate(playerPrefab, transform.position, Quaternion.identity);
 
+        EventSystemNew<Transform>.RaiseEvent(Event_Type.PLAYER_TRANSFORM, spawnedPlayer.transform);
+
         elapsedTime = destroyTime;
     }
 

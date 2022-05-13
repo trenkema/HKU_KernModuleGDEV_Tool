@@ -38,6 +38,8 @@ public class LevelManager : MonoBehaviour
 
     [SerializeField] GameObject gameOverUI;
 
+    [SerializeField] GameObject manualScreenshotUI;
+
     [SerializeField] GameObject levelEntryDisplayItem;
 
     [SerializeField] Transform levelDataEntryContent;
@@ -56,6 +58,8 @@ public class LevelManager : MonoBehaviour
     int finishPointAdded = 0;
 
     bool retrieveOwnLevelsOnly = false;
+
+    bool canRespawn = false;
 
     private void OnEnable()
     {
@@ -99,6 +103,8 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
+        manualScreenshotUI.SetActive(false);
+
         updateLevelButton.SetActive(false);
 
         LootLockerSDKManager.GetPlayerName(response =>
@@ -212,6 +218,8 @@ public class LevelManager : MonoBehaviour
                                             }
 
                                             EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
+
+                                            EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
                                         }
                                     }
                                 }
@@ -220,6 +228,8 @@ public class LevelManager : MonoBehaviour
                         else
                         {
                             EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
+
+                            EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
                         }
                     }
                 });
@@ -259,7 +269,7 @@ public class LevelManager : MonoBehaviour
     {
         TakeScreenshot();
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.25f);
 
         levelUploadUI.SetActive(true);
     }
@@ -319,6 +329,8 @@ public class LevelManager : MonoBehaviour
                                                     updateLevelButton.SetActive(true);
 
                                                     EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
+
+                                                    EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
                                                 }
                                                 else
                                                 {
@@ -552,39 +564,51 @@ public class LevelManager : MonoBehaviour
     private void LevelCompleted()
     {
         levelCompletedUI.SetActive(true);
+
+        canRespawn = true;
     }
 
     private void LevelFailed()
     {
         gameOverUI.SetActive(true);
+
+        canRespawn = true;
     }
 
     public void RestartGame()
     {
-        levelCompletedUI.SetActive(false);
+        if (canRespawn)
+        {
+            canRespawn = false;
 
-        gameOverUI.SetActive(false);
+            levelCompletedUI.SetActive(false);
 
-        LoadLevel();
+            gameOverUI.SetActive(false);
 
-        StartGame();
+            LoadLevel();
+
+            StartGame();
+        }
     }
 
     public void EditGame()
     {
-        EventSystemNew.RaiseEvent(Event_Type.EDIT_LEVEL);
+        if (canRespawn)
+        {
+            canRespawn = false;
 
-        levelCompletedUI.SetActive(false);
+            levelCompletedUI.SetActive(false);
 
-        gameOverUI.SetActive(false);
+            gameOverUI.SetActive(false);
 
-        LoadLevel();
+            LoadLevel();
 
-        loadingLevelUI.SetActive(false);
+            loadingLevelUI.SetActive(false);
 
-        editorUI.SetActive(true);
+            editorUI.SetActive(true);
 
-        inGameUI.SetActive(false);
+            inGameUI.SetActive(false);
+        }
     }
 
     public void StartGame()
@@ -634,7 +658,7 @@ public class LevelManager : MonoBehaviour
     {
         TakeScreenshot();
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.25f);
 
         LootLockerSDKManager.CreatingAnAssetCandidate(levelName, (response) =>
         {
@@ -705,6 +729,22 @@ public class LevelManager : MonoBehaviour
                 Debug.Log("Added to favorite");
             }
         });
+    }
+
+    public void TakeManualScreenshot()
+    {
+        StartCoroutine(ManualScreenshot());
+    }
+
+    private IEnumerator ManualScreenshot()
+    {
+        manualScreenshotUI.SetActive(false);
+
+        TakeScreenshot();
+
+        yield return new WaitForSeconds(0.25f);
+
+        editorUI.SetActive(true);
     }
 
     public void QuitGame()
