@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
         EventSystemNew.RaiseEvent(Event_Type.STOP_ITEMS);
     }
 
-    public void StopMoving()
+    public void StopDragging()
     {
         EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, false);
     }

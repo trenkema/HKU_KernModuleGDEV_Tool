@@ -33,7 +33,7 @@ public class PrefabLevelEditor : MonoBehaviour
 
     bool isHovering = false;
 
-    bool isDragging = true;
+    bool isDragging = false;
 
     private void OnEnable()
     {

@@ -47,7 +47,7 @@ public class TileLevelEditor : MonoBehaviour
 
     bool isHovering = false;
 
-    bool isDragging = true;
+    bool isDragging = false;
 
     private void OnEnable()
     {

@@ -23,6 +23,8 @@ public class LevelManager : MonoBehaviour
 
     [SerializeField] GameObject missingStartOrFinishUI;
 
+    [SerializeField] GameObject startMissing, finishMissing;
+
     [SerializeField] GameObject editorUI;
     [SerializeField] GameObject inGameUI;
 
@@ -630,6 +632,9 @@ public class LevelManager : MonoBehaviour
         else
         {
             missingStartOrFinishUI.SetActive(true);
+
+            startMissing.SetActive(startPointAdded == 0 ? true : false);
+            finishMissing.SetActive(finishPointAdded == 0 ? true : false);
         }
     }
 

@@ -5,10 +5,6 @@ using UnityEngine.InputSystem;
 
 public class OrthographicZoom : MonoBehaviour
 {
-    [SerializeField] GameObject hoverText;
-
-    [SerializeField] GameObject crossIcon;
-
     [SerializeField] Camera cam;
 
     [SerializeField] float maxZoom = 5f;
@@ -67,16 +63,6 @@ public class OrthographicZoom : MonoBehaviour
         }
     }
 
-    public void OnHoverEnter()
-    {
-        hoverText.SetActive(true);
-    }
-
-    public void OnHoverExit()
-    {
-        hoverText.SetActive(false);
-    }
-
     public void PanClickedCamera(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Started)
@@ -127,8 +113,6 @@ public class OrthographicZoom : MonoBehaviour
     {
         canDrag = !canDrag;
 
-        crossIcon.SetActive(canDrag ? false : true);
-
         if (canDrag)
         {
             EventSystemNew.RaiseEvent(Event_Type.STOP_ITEMS);
@@ -138,8 +122,6 @@ public class OrthographicZoom : MonoBehaviour
     public void ToggleDrag(bool _canDrag)
     {
         canDrag = _canDrag;
-
-        crossIcon.SetActive(canDrag ? false : true);
     }
 
     public void ResetCamera()
