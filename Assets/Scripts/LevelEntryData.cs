@@ -43,6 +43,8 @@ public class LevelEntryData : MonoBehaviour
 
     public void LoadLevel()
     {
+        EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, true);
+
         EventSystemNew<string, LevelEntryData>.RaiseEvent(Event_Type.LOAD_LEVEL, textFileURL, this);
     }
 

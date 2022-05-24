@@ -15,7 +15,7 @@ public class StartPoint : MonoBehaviour
 
     float elapsedTime = 0f;
 
-    bool gameStarted = false;
+    bool startTimer = false;
 
     GameObject spawnedPlayer;
 
@@ -50,20 +50,20 @@ public class StartPoint : MonoBehaviour
 
     private void Update()
     {
-        if (destroy && gameStarted)
+        if (destroy && startTimer)
             DestroyStartPoint();
     }
 
     private void LevelCompleted()
     {
-        gameStarted = false;
+        startTimer = false;
 
         elapsedTime = destroyTime;
     }
 
     private void GameStarted()
     {
-        gameStarted = true;
+        startTimer = true;
 
         if (spawnedPlayer != null)
         {
@@ -72,9 +72,13 @@ public class StartPoint : MonoBehaviour
 
         spawnedPlayer = Instantiate(playerPrefab, transform.position, Quaternion.identity);
 
+        Debug.Log("Spawned Player: " + spawnedPlayer.name);
+
         EventSystemNew<Transform>.RaiseEvent(Event_Type.PLAYER_TRANSFORM, spawnedPlayer.transform);
 
         elapsedTime = destroyTime;
+
+        Debug.Log("Game Started");
     }
 
     private void DestroyStartPoint()

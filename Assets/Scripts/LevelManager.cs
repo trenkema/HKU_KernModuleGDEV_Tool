@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
 using UnityEditor;
+using UnityEngine.InputSystem;
 
 public enum LevelManagerType
 {
@@ -24,6 +25,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] GameObject missingStartOrFinishUI;
 
     [SerializeField] GameObject startMissing, finishMissing;
+    [SerializeField] GameObject tooManyStarts, tooManyFinishes;
 
     [SerializeField] GameObject editorUI;
     [SerializeField] GameObject inGameUI;
@@ -61,7 +63,7 @@ public class LevelManager : MonoBehaviour
 
     bool retrieveOwnLevelsOnly = false;
 
-    bool canRespawn = false;
+    bool isPlaying = false;
 
     private void OnEnable()
     {
@@ -172,8 +174,6 @@ public class LevelManager : MonoBehaviour
 #if UNITY_EDITOR
         AssetDatabase.Refresh();
 #endif
-
-        EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, true);
 
         yield return new WaitForSeconds(1f);
 
@@ -566,23 +566,17 @@ public class LevelManager : MonoBehaviour
     private void LevelCompleted()
     {
         levelCompletedUI.SetActive(true);
-
-        canRespawn = true;
     }
 
     private void LevelFailed()
     {
         gameOverUI.SetActive(true);
-
-        canRespawn = true;
     }
 
     public void RestartGame()
     {
-        if (canRespawn)
+        if (isPlaying)
         {
-            canRespawn = false;
-
             levelCompletedUI.SetActive(false);
 
             gameOverUI.SetActive(false);
@@ -593,11 +587,28 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    public void QuickRestartGame(InputAction.CallbackContext _context)
+    {
+        if (_context.phase == InputActionPhase.Started)
+        {
+            if (isPlaying)
+            {
+                levelCompletedUI.SetActive(false);
+
+                gameOverUI.SetActive(false);
+
+                LoadLevel();
+
+                StartGame();
+            }
+        }
+    }
+
     public void EditGame()
     {
-        if (canRespawn)
+        if (isPlaying)
         {
-            canRespawn = false;
+            isPlaying = false;
 
             levelCompletedUI.SetActive(false);
 
@@ -613,10 +624,37 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    public void EditGame(InputAction.CallbackContext _context)
+    {
+        if (_context.phase == InputActionPhase.Started)
+        {
+            if (isPlaying)
+            {
+                isPlaying = false;
+
+                levelCompletedUI.SetActive(false);
+
+                gameOverUI.SetActive(false);
+
+                LoadLevel();
+
+                loadingLevelUI.SetActive(false);
+
+                editorUI.SetActive(true);
+
+                inGameUI.SetActive(false);
+            }
+        }
+    }
+
     public void StartGame()
     {
-        if (startPointAdded > 0 && finishPointAdded > 0)
+        if (startPointAdded == 1 && finishPointAdded == 1)
         {
+            Debug.Log("Started Game");
+
+            isPlaying = true;
+
             EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, true);
 
             SaveLevel();
@@ -635,6 +673,9 @@ public class LevelManager : MonoBehaviour
 
             startMissing.SetActive(startPointAdded == 0 ? true : false);
             finishMissing.SetActive(finishPointAdded == 0 ? true : false);
+
+            tooManyStarts.SetActive(startPointAdded > 1 ? true : false);
+            tooManyFinishes.SetActive(finishPointAdded > 1 ? true : false);
         }
     }
 

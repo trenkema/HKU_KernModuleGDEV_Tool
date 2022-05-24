@@ -116,8 +116,6 @@ public class PrefabLevelEditor : MonoBehaviour
                         {
                             if (!placedPrefabsData.ContainsKey(pos))
                             {
-                                Debug.Log("Can Place");
-
                                 GameObject instantiatedPrefab = Instantiate(selectedPrefab, pos, Quaternion.Euler(0f, 0f, currentRotation));
 
                                 placedPrefabs.Add(instantiatedPrefab);
@@ -142,7 +140,7 @@ public class PrefabLevelEditor : MonoBehaviour
                         }
                         else
                         {
-                            Debug.Log("Can't Place");
+                            return;
                         }
                     }
                 }
@@ -170,7 +168,7 @@ public class PrefabLevelEditor : MonoBehaviour
                         {
                             placedPrefabsData.Remove(placeablePrefab.position);
 
-                            Destroy(hit.transform.gameObject);
+                            Destroy(placeablePrefab.gameObject);
                         }
                     }
                 }
@@ -287,32 +285,7 @@ public class PrefabLevelEditor : MonoBehaviour
         }
 
         return levelData;
-
-        //string json = JsonUtility.ToJson(levelData, true);
-
-        //File.WriteAllText(Application.dataPath + "/prefabLevel.json", json);
-
-        //Debug.Log("Prefabs Saved");
     }
-
-    //private void SaveLevel()
-    //{
-    //    PrefabLevelData levelData = new PrefabLevelData();
-
-    //    foreach (var placedPrefab in placedPrefabsData)
-    //    {
-    //        levelData.prefabIDs.Add(placedPrefab.Value.prefabID);
-    //        levelData.positionsX.Add(placedPrefab.Key.x);
-    //        levelData.positionsY.Add(placedPrefab.Key.y);
-    //        levelData.zRotation.Add(placedPrefab.Value.zRotation);
-    //    }
-
-    //    string json = JsonUtility.ToJson(levelData, true);
-
-    //    File.WriteAllText(Application.dataPath + "/prefabLevel.json", json);
-
-    //    Debug.Log("Prefabs Saved");
-    //}
 
     public void LoadLevel(PrefabLevelData _levelData)
     {
@@ -331,8 +304,6 @@ public class PrefabLevelEditor : MonoBehaviour
         {
             LoadPlacedPrefabs(levelData.prefabIDs[i], new Vector3(levelData.positionsX[i], levelData.positionsY[i], 0f), levelData.zRotation[i]);
         }
-
-        Debug.Log("Prefabs Loaded");
 
         EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
     }
