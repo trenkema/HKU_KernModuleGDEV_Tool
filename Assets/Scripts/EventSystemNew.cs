@@ -37,6 +37,8 @@ public enum Event_Type
     STOP_ITEMS,
     DRAGGING,
 
+    TOGGLE_ZOOM,
+
     PLAYER_TRANSFORM
 }
 

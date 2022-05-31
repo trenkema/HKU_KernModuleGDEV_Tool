@@ -18,6 +18,10 @@ public enum LevelManagerType
 
 public class LevelManager : MonoBehaviour
 {
+    [SerializeField] AudioSource audioSource;
+
+    [SerializeField] GameObject pageSelector;
+
     [SerializeField] GameObject updateLevelButton;
 
     [SerializeField] TMP_InputField levelNameInputField;
@@ -31,6 +35,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] GameObject inGameUI;
 
     [SerializeField] GameObject loadingLevelUI;
+    [SerializeField] GameObject uploadingLevelUI;
+    [SerializeField] GameObject downloadingLevelsUI;
 
     [SerializeField] GameObject levelUploadUI;
 
@@ -107,6 +113,8 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
+        pageSelector.SetActive(false);
+
         manualScreenshotUI.SetActive(false);
 
         updateLevelButton.SetActive(false);
@@ -222,6 +230,7 @@ public class LevelManager : MonoBehaviour
                                             EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
 
                                             EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
+                                            EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
                                         }
                                     }
                                 }
@@ -232,6 +241,7 @@ public class LevelManager : MonoBehaviour
                             EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
 
                             EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
+                            EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
                         }
                     }
                 });
@@ -241,7 +251,7 @@ public class LevelManager : MonoBehaviour
 
     public void CreateLevel()
     {
-        EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, true);
+        uploadingLevelUI.SetActive(true);
 
         levelName = levelNameInputField.text;
 
@@ -330,9 +340,10 @@ public class LevelManager : MonoBehaviour
 
                                                     updateLevelButton.SetActive(true);
 
-                                                    EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
+                                                    uploadingLevelUI.SetActive(false);
 
                                                     EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
+                                                    EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
                                                 }
                                                 else
                                                 {
@@ -394,6 +405,9 @@ public class LevelManager : MonoBehaviour
 
     public void DownloadLevelData()
     {
+        pageSelector.SetActive(false);
+        downloadingLevelsUI.SetActive(true);
+
         foreach (var displayItem in displayItems)
         {
             Destroy(displayItem);
@@ -456,6 +470,8 @@ public class LevelManager : MonoBehaviour
                                             levelEntryData.textFileURL = levelImageFiles[1].url.ToString();
                                         }
                                     }
+
+                                    Invoke(nameof(AssetsDownloaded), 0.3f);
                                 }
                                 else
                                 {
@@ -531,6 +547,8 @@ public class LevelManager : MonoBehaviour
                                     levelEntryData.textFileURL = levelImageFiles[1].url.ToString();
                                 }
                             }
+
+                            Invoke(nameof(AssetsDownloaded), 0.25f);
                         }
                         else
                         {
@@ -540,6 +558,12 @@ public class LevelManager : MonoBehaviour
                 });
             }
         }, null, true);
+    }
+
+    private void AssetsDownloaded()
+    {
+        pageSelector.SetActive(true);
+        downloadingLevelsUI.SetActive(false);
     }
 
     IEnumerator LoadLevelIcon(string _imageURl, Image _levelImage)
@@ -577,6 +601,9 @@ public class LevelManager : MonoBehaviour
     {
         if (isPlaying)
         {
+            audioSource.time = 0;
+            audioSource.Play();
+
             levelCompletedUI.SetActive(false);
 
             gameOverUI.SetActive(false);
@@ -593,6 +620,9 @@ public class LevelManager : MonoBehaviour
         {
             if (isPlaying)
             {
+                audioSource.time = 0;
+                audioSource.Play();
+
                 levelCompletedUI.SetActive(false);
 
                 gameOverUI.SetActive(false);
@@ -608,6 +638,8 @@ public class LevelManager : MonoBehaviour
     {
         if (isPlaying)
         {
+            audioSource.Stop();
+
             isPlaying = false;
 
             levelCompletedUI.SetActive(false);
@@ -630,6 +662,8 @@ public class LevelManager : MonoBehaviour
         {
             if (isPlaying)
             {
+                audioSource.Stop();
+
                 isPlaying = false;
 
                 levelCompletedUI.SetActive(false);
@@ -651,6 +685,9 @@ public class LevelManager : MonoBehaviour
     {
         if (startPointAdded == 1 && finishPointAdded == 1)
         {
+            audioSource.time = 0;
+            audioSource.Play();
+
             Debug.Log("Started Game");
 
             isPlaying = true;

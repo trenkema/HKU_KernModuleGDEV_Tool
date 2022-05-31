@@ -27,16 +27,20 @@ public class OrthographicZoom : MonoBehaviour
 
     bool isDragging = false;
 
+    bool canZoom = true;
+
     float startZoom;
 
     private void OnEnable()
     {
         EventSystemNew<bool>.Subscribe(Event_Type.TOGGLE_DRAGGING, ToggleDrag);
+        EventSystemNew<bool>.Subscribe(Event_Type.TOGGLE_ZOOM, ToggleZoom);
     }
 
     private void OnDisable()
     {
         EventSystemNew<bool>.Unsubscribe(Event_Type.TOGGLE_DRAGGING, ToggleDrag);
+        EventSystemNew<bool>.Unsubscribe(Event_Type.TOGGLE_ZOOM, ToggleZoom);
     }
 
     private void Start()
@@ -46,10 +50,13 @@ public class OrthographicZoom : MonoBehaviour
 
     private void Update()
     {
-        targetZoom -= Input.mouseScrollDelta.y * sensitivity;
-        targetZoom = Mathf.Clamp(targetZoom, maxZoom, minZoom);
-        float newSize = Mathf.MoveTowards(cam.orthographicSize, targetZoom, speed * Time.deltaTime);
-        cam.orthographicSize = newSize;
+        if (canZoom)
+        {
+            targetZoom -= Input.mouseScrollDelta.y * sensitivity;
+            targetZoom = Mathf.Clamp(targetZoom, maxZoom, minZoom);
+            float newSize = Mathf.MoveTowards(cam.orthographicSize, targetZoom, speed * Time.deltaTime);
+            cam.orthographicSize = newSize;
+        }
 
         cam.gameObject.transform.position = ClampCamera(cam.gameObject.transform.position);
 
@@ -122,6 +129,11 @@ public class OrthographicZoom : MonoBehaviour
     public void ToggleDrag(bool _canDrag)
     {
         canDrag = _canDrag;
+    }
+
+    public void ToggleZoom(bool _canZoom)
+    {
+        canZoom = _canZoom;
     }
 
     public void ResetCamera()
