@@ -90,8 +90,9 @@ public class ItemController : MonoBehaviour
 
     private void StopItem()
     {
+        isActive = false;
+
         EventSystemNew.RaiseEvent(Event_Type.DESTROY_DRAG_IMAGE);
-        EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, -1);
         EventSystemNew<LevelManagerType>.RaiseEvent(Event_Type.ENABLE_LEVEL_EDITOR, LevelManagerType.None);
     }
 
@@ -188,13 +189,16 @@ public class ItemController : MonoBehaviour
 
     private void DraggingLevel(bool _isDragging)
     {
-        if (_isDragging && isActive)
+        if (activeDragImage != null)
         {
-            activeDragImage.SetActive(false);
-        }
-        else if (!_isDragging && isActive)
-        {
-            activeDragImage.SetActive(true);
+            if (_isDragging && isActive)
+            {
+                activeDragImage.SetActive(false);
+            }
+            else if (!_isDragging && isActive)
+            {
+                activeDragImage.SetActive(true);
+            }
         }
     }
 }
