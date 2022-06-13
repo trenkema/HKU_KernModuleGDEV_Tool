@@ -29,14 +29,20 @@ public class LevelManager : MonoBehaviour
     [SerializeField] GameObject missingStartOrFinishUI;
 
     [SerializeField] GameObject startMissing, finishMissing;
-    [SerializeField] GameObject tooManyStarts, tooManyFinishes;
+    [SerializeField] TextMeshProUGUI tooManyStartsText, tooManyFinishesText;
 
     [SerializeField] GameObject editorUI;
     [SerializeField] GameObject inGameUI;
 
     [SerializeField] GameObject loadingLevelUI;
     [SerializeField] GameObject uploadingLevelUI;
+    [SerializeField] GameObject updatingLevelUI;
     [SerializeField] GameObject downloadingLevelsUI;
+
+    [SerializeField] Toggle updateLevelToggle;
+    [SerializeField] Toggle uploadLevelToggle;
+
+    [SerializeField] GameObject updateLevelUI;
 
     [SerializeField] GameObject levelUploadUI;
 
@@ -263,7 +269,7 @@ public class LevelManager : MonoBehaviour
 
                 currentAssetID = response.asset_candidate_id;
 
-                UploadLevelData(response.asset_candidate_id, response.asset_candidate_id);
+                UploadLevelData(response.asset_candidate_id, response.asset_candidate_id, uploadLevelToggle.isOn ? true : false);
             }
         });
     }
@@ -286,9 +292,18 @@ public class LevelManager : MonoBehaviour
         levelUploadUI.SetActive(true);
     }
 
+    IEnumerator UpdateWaitScreenshot()
+    {
+        TakeScreenshot();
+
+        yield return new WaitForSeconds(0.25f);
+
+        updateLevelUI.SetActive(true);
+    }
+
     public void OpenUploadLevelUI()
     {
-        if (startPointAdded > 0 && finishPointAdded > 0)
+        if (startPointAdded == 1 && finishPointAdded == 1)
         {
             SaveLevel();
 
@@ -297,10 +312,42 @@ public class LevelManager : MonoBehaviour
         else
         {
             missingStartOrFinishUI.SetActive(true);
+
+            startMissing.SetActive(startPointAdded == 0 ? true : false);
+            finishMissing.SetActive(finishPointAdded == 0 ? true : false);
+
+            tooManyStartsText.gameObject.SetActive(startPointAdded > 1 ? true : false);
+            tooManyFinishesText.gameObject.SetActive(finishPointAdded > 1 ? true : false);
+
+            tooManyStartsText.text = string.Format("- Remove {0} Start Points", startPointAdded - 1);
+            tooManyFinishesText.text = string.Format("- Remove {0} Finish Points", finishPointAdded - 1);
         }
     }
 
-    public void UploadLevelData(int _levelID, int _assetID)
+    public void OpenUpdateLevelUI()
+    {
+        if (startPointAdded == 1 && finishPointAdded == 1)
+        {
+            SaveLevel();
+
+            StartCoroutine(UpdateWaitScreenshot());
+        }
+        else
+        {
+            missingStartOrFinishUI.SetActive(true);
+
+            startMissing.SetActive(startPointAdded == 0 ? true : false);
+            finishMissing.SetActive(finishPointAdded == 0 ? true : false);
+
+            tooManyStartsText.gameObject.SetActive(startPointAdded > 1 ? true : false);
+            tooManyFinishesText.gameObject.SetActive(finishPointAdded > 1 ? true : false);
+
+            tooManyStartsText.text = string.Format("- Remove {0} Start Points", startPointAdded - 1);
+            tooManyFinishesText.text = string.Format("- Remove {0} Finish Points", finishPointAdded - 1);
+        }
+    }
+
+    public void UploadLevelData(int _levelID, int _assetID, bool _isPublic)
     {
         string screenshotFilePath = Application.dataPath + "/" + "Level-Screenshot.png";
 
@@ -344,6 +391,8 @@ public class LevelManager : MonoBehaviour
 
                                                     EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
                                                     EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
+
+                                                    EventSystemNew<string>.RaiseEvent(Event_Type.DEACTIVATE_LEVEL, _assetID.ToString());
                                                 }
                                                 else
                                                 {
@@ -711,8 +760,12 @@ public class LevelManager : MonoBehaviour
             startMissing.SetActive(startPointAdded == 0 ? true : false);
             finishMissing.SetActive(finishPointAdded == 0 ? true : false);
 
-            tooManyStarts.SetActive(startPointAdded > 1 ? true : false);
-            tooManyFinishes.SetActive(finishPointAdded > 1 ? true : false);
+
+            tooManyStartsText.gameObject.SetActive(startPointAdded > 1 ? true : false);
+            tooManyFinishesText.gameObject.SetActive(finishPointAdded > 1 ? true : false);
+
+            tooManyStartsText.text = string.Format("- Remove {0} Start Points", startPointAdded - 1);
+            tooManyFinishesText.text = string.Format("- Remove {0} Finish Points", finishPointAdded - 1);
         }
     }
 
@@ -725,31 +778,15 @@ public class LevelManager : MonoBehaviour
 
     public void UpdateLevel()
     {
-        if (startPointAdded > 0 && finishPointAdded > 0)
-        {
-            SaveLevel();
+        updatingLevelUI.SetActive(true);
 
-            StartCoroutine(UpdateLevelScreenshot());
-        }
-        else
-        {
-            missingStartOrFinishUI.SetActive(true);
-        }
-    }
-
-    private IEnumerator UpdateLevelScreenshot()
-    {
-        TakeScreenshot();
-
-        yield return new WaitForSeconds(0.25f);
+        SaveLevel();
 
         LootLockerSDKManager.CreatingAnAssetCandidate(levelName, (response) =>
         {
             if (response.success)
             {
-                Debug.Log("Updated Asset");
-
-                UploadLevelData(response.asset_candidate_id, currentAssetID);
+                UploadLevelData(response.asset_candidate_id, currentAssetID, updateLevelToggle.isOn ? true : false);
             }
         });
     }

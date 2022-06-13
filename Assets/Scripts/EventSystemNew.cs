@@ -39,7 +39,12 @@ public enum Event_Type
 
     TOGGLE_ZOOM,
 
-    PLAYER_TRANSFORM
+    PLAYER_TRANSFORM,
+
+    TUTORIAL_TILE_PLACED,
+    TUTORIAL_TILE_DELETED,
+    TUTORIAL_PREFAB_PLACED,
+    TUTORIAL_PREFAB_DELETED
 }
 
 public static class EventSystemNew

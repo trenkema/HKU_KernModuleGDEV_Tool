@@ -155,11 +155,15 @@ public class TileLevelEditor : MonoBehaviour
 
     void PlaceTile(Vector3Int _pos)
     {
+        EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_TILE_PLACED);
+
         currentTilemap.SetTile(_pos, currentTile);
     }
 
     void DeleteTile(Vector3Int _pos)
     {
+        EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_TILE_DELETED);
+
         currentTilemap.SetTile(_pos, null);
     }
 

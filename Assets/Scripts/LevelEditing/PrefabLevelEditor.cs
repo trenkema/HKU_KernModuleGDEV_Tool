@@ -116,6 +116,8 @@ public class PrefabLevelEditor : MonoBehaviour
                         {
                             if (!placedPrefabsData.ContainsKey(pos))
                             {
+                                EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_PLACED);
+
                                 GameObject instantiatedPrefab = Instantiate(selectedPrefab, pos, Quaternion.Euler(0f, 0f, currentRotation));
 
                                 placedPrefabs.Add(instantiatedPrefab);
@@ -166,6 +168,8 @@ public class PrefabLevelEditor : MonoBehaviour
 
                         if (placeablePrefab != null)
                         {
+                            EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_DELETED);
+
                             placedPrefabsData.Remove(placeablePrefab.position);
 
                             Destroy(placeablePrefab.gameObject);
