@@ -147,42 +147,46 @@ public class PrefabLevelEditor : MonoBehaviour
     {
         PlaceablePrefab placeablePrefab = selectedPrefab.GetComponent<PlaceablePrefab>();
 
-        if (placeablePrefab != null)
+        if (placeablePrefab == null)
         {
-            Vector3Int cellPos = tilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+            return;
+        }
 
-            Vector3 pos = tilemap.GetCellCenterWorld(cellPos);
+        Vector3Int cellPos = tilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
 
-            bool canPlace = CanPlace(cellPos, placeablePrefab.leftSizeGet, placeablePrefab.rightSizeGet, placeablePrefab.upSizeGet, placeablePrefab.bottomSizeGet);
+        Vector3 pos = tilemap.GetCellCenterWorld(cellPos);
 
-            if (canPlace)
+        bool canPlace = CanPlace(cellPos, placeablePrefab.leftSizeGet, placeablePrefab.rightSizeGet, placeablePrefab.upSizeGet, placeablePrefab.bottomSizeGet);
+
+        if (!canPlace)
+        {
+            return;
+        }
+
+        if (!placedPrefabsData.ContainsKey(pos))
+        {
+            EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_PLACED);
+
+            GameObject instantiatedPrefab = Instantiate(selectedPrefab, pos, Quaternion.Euler(0f, 0f, currentRotation));
+
+            placedPrefabs.Add(instantiatedPrefab);
+
+            int prefabID = 0;
+
+            for (int i = 0; i < itemPrefabs.Length; i++)
             {
-                if (!placedPrefabsData.ContainsKey(pos))
+                if (selectedPrefab == itemPrefabs[i])
                 {
-                    EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_PLACED);
-
-                    GameObject instantiatedPrefab = Instantiate(selectedPrefab, pos, Quaternion.Euler(0f, 0f, currentRotation));
-
-                    placedPrefabs.Add(instantiatedPrefab);
-
-                    int prefabID = 0;
-
-                    for (int i = 0; i < itemPrefabs.Length; i++)
-                    {
-                        if (selectedPrefab == itemPrefabs[i])
-                        {
-                            prefabID = i;
-                        }
-                    }
-
-                    PrefabPlacedData placedData = new PrefabPlacedData();
-
-                    placedData.prefabID = prefabID;
-                    placedData.zRotation = currentRotation;
-
-                    placedPrefabsData.Add(pos, placedData);
+                    prefabID = i;
                 }
             }
+
+            PrefabPlacedData placedData = new PrefabPlacedData();
+
+            placedData.prefabID = prefabID;
+            placedData.zRotation = currentRotation;
+
+            placedPrefabsData.Add(pos, placedData);
         }
     }
 
@@ -190,19 +194,23 @@ public class PrefabLevelEditor : MonoBehaviour
     {
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, Mathf.Infinity, prefabsLayers);
 
-        if (hit.collider != null)
+        if (hit.collider == null)
         {
-            PlaceablePrefab placeablePrefab = hit.transform.GetComponentInParent<PlaceablePrefab>();
-
-            if (placeablePrefab != null)
-            {
-                EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_DELETED);
-
-                placedPrefabsData.Remove(placeablePrefab.position);
-
-                Destroy(placeablePrefab.gameObject);
-            }
+            return;
         }
+
+        PlaceablePrefab placeablePrefab = hit.transform.GetComponentInParent<PlaceablePrefab>();
+
+        if (placeablePrefab == null)
+        {
+            return;
+        }
+
+        EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_DELETED);
+
+        placedPrefabsData.Remove(placeablePrefab.position);
+
+        Destroy(placeablePrefab.gameObject);
     }
 
     private void EquipPrefab(GameObject _prefab)
