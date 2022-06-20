@@ -8,7 +8,6 @@ public class TileLevelEditor : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] Tilemap defaultTilemap;
-
     [SerializeField] Camera cam;
 
     [Header("Settings")]
@@ -36,7 +35,7 @@ public class TileLevelEditor : MonoBehaviour
             return TileLevelManager.Instance.tiles[selectedTileIndex].tile;
         }
     }
-    
+
     int selectedTileIndex = 0;
 
     bool isPlacing = false;
@@ -70,25 +69,35 @@ public class TileLevelEditor : MonoBehaviour
     }
 
     private void Update()
-    {        
+    {
         if (isPlacing && !isHovering && isActive)
         {
-            if (!GraphicRaycasterCheck.Instance.IsHittingUI())
+            if (GraphicRaycasterCheck.Instance.IsHittingUI())
             {
-                Vector3Int pos = currentTilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+                return;
+            }
 
+            Vector3Int pos = currentTilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+
+            if (GetTile(pos) == null || GetTile(pos) != currentTile)
+            {
                 PlaceTile(pos);
             }
         }
 
         if (isDeleting && !isHovering && isActive)
         {
-            if (!GraphicRaycasterCheck.Instance.IsHittingUI())
+            if (GraphicRaycasterCheck.Instance.IsHittingUI())
             {
-                if (currentTilemap.name != Tilemaps.Background.ToString())
-                {
-                    Vector3Int pos = currentTilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+                return;
+            }
 
+            if (currentTilemap.name != Tilemaps.Background.ToString())
+            {
+                Vector3Int pos = currentTilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+
+                if (GetTile(pos) != null)
+                {
                     DeleteTile(pos);
                 }
             }
@@ -165,6 +174,11 @@ public class TileLevelEditor : MonoBehaviour
         EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_TILE_DELETED);
 
         currentTilemap.SetTile(_pos, null);
+    }
+
+    private TileBase GetTile(Vector3Int _pos)
+    {
+        return currentTilemap.GetTile(_pos);
     }
 
     private void DraggingLevel(bool _isDragging)

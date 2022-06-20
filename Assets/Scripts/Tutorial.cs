@@ -16,6 +16,10 @@ public class Tutorial : MonoBehaviour
 
     bool waitingForGrassRemoving = false;
 
+    bool waitingForStartPlacement = false;
+
+    bool waitingForFinishplacement = false;
+
     int grassPlaced = 0;
 
     int grassRemoved = 0;
@@ -27,6 +31,8 @@ public class Tutorial : MonoBehaviour
         EventSystemNew.Subscribe(Event_Type.TUTORIAL_TILE_PLACED, GrassPlaced);
 
         EventSystemNew.Subscribe(Event_Type.TUTORIAL_TILE_DELETED, GrassDeleted);
+
+        EventSystemNew.Subscribe(Event_Type.TUTORIAL_PREFAB_PLACED, StartPlaced);
     }
 
     private void OnDisable()
@@ -36,16 +42,14 @@ public class Tutorial : MonoBehaviour
         EventSystemNew.Unsubscribe(Event_Type.TUTORIAL_TILE_PLACED, GrassPlaced);
 
         EventSystemNew.Unsubscribe(Event_Type.TUTORIAL_TILE_DELETED, GrassDeleted);
-    }
 
-    private void Start()
-    {
-        
+        EventSystemNew.Unsubscribe(Event_Type.TUTORIAL_PREFAB_PLACED, StartPlaced);
+        EventSystemNew.Unsubscribe(Event_Type.TUTORIAL_PREFAB_PLACED, FinishPlaced);
     }
 
     public void StartTutorial()
     {
-        animator.SetTrigger("StartTutorial");
+        SetAnimationTrigger(animator, "StartTutorial");
     }
 
     private void GrassSelected(int _itemControllerID)
@@ -54,9 +58,9 @@ public class Tutorial : MonoBehaviour
         {
             waitingForGrassSelection = false;
 
-            animator.SetTrigger("GrassClicked");
-
             waitingForGrassPlacement = true;
+
+            SetAnimationTrigger(animator, "GrassClicked");
         }
     }
 
@@ -72,7 +76,7 @@ public class Tutorial : MonoBehaviour
 
                 waitingForGrassRemoving = true;
 
-                animator.SetTrigger("GrassPlaced");
+                SetAnimationTrigger(animator, "GrassPlaced");
             }
         }
     }
@@ -87,8 +91,51 @@ public class Tutorial : MonoBehaviour
             {
                 waitingForGrassRemoving = false;
 
-                animator.SetTrigger("GrassRemoved");
+                waitingForStartPlacement = true;
+
+                SetAnimationTrigger(animator, "GrassRemoved");
             }
         }
+    }
+
+    private void StartPlaced()
+    {
+        if (waitingForStartPlacement)
+        {
+            waitingForStartPlacement = false;
+            waitingForFinishplacement = true;
+
+            EventSystemNew.Subscribe(Event_Type.TUTORIAL_PREFAB_PLACED, FinishPlaced);
+
+            SetAnimationTrigger(animator, "StartPlaced");
+        }
+    }
+
+    private void FinishPlaced()
+    {
+        if (waitingForFinishplacement)
+        {
+            waitingForFinishplacement = false;
+
+            SetAnimationTrigger(animator, "FinishPlaced");
+        }
+    }
+
+    public void ItemSettingsWheelClicked()
+    {
+        if (waitingForStartPlacement)
+        {
+            SetAnimationTrigger(animator, "StartClicked");
+        }
+
+        if (waitingForFinishplacement)
+        {
+            SetAnimationTrigger(animator, "FinishClicked");
+        }
+    }
+
+    private void SetAnimationTrigger(Animator _animator, string _trigger)
+    {
+        _animator.SetTrigger(_trigger);
     }
 }

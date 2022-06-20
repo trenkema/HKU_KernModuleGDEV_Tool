@@ -68,7 +68,7 @@ public class PrefabLevelEditor : MonoBehaviour
         isActive = false;
     }
 
-    private void LoadPlacedPrefabs(int _prefabID, Vector3 _position, float _zRotation)
+    private void LoadPlacedPrefab(int _prefabID, Vector3 _position, float _zRotation)
     {
         GameObject instantiatedPrefab = Instantiate(itemPrefabs[_prefabID], _position, Quaternion.Euler(0f, 0f, _zRotation));
 
@@ -96,87 +96,37 @@ public class PrefabLevelEditor : MonoBehaviour
 
     public void OnPlacePrefab(InputAction.CallbackContext _callbackContext)
     {
-        if (isActive && !isHovering && !isDragging)
+        if (!isActive || isHovering || isDragging)
         {
-            if (_callbackContext.phase == InputActionPhase.Started)
+            return;
+        }
+
+        if (_callbackContext.phase == InputActionPhase.Started)
+        {
+            if (GraphicRaycasterCheck.Instance.IsHittingUI())
             {
-                if (!GraphicRaycasterCheck.Instance.IsHittingUI())
-                {
-                    PlaceablePrefab placeablePrefab = selectedPrefab.GetComponent<PlaceablePrefab>();
-
-                    if (placeablePrefab != null)
-                    {
-                        Vector3Int cellPos = tilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
-
-                        Vector3 pos = tilemap.GetCellCenterWorld(cellPos);
-
-                        bool canPlace = CanPlace(cellPos, placeablePrefab.leftSizeGet, placeablePrefab.rightSizeGet, placeablePrefab.upSizeGet, placeablePrefab.bottomSizeGet);
-
-                        if (canPlace)
-                        {
-                            if (!placedPrefabsData.ContainsKey(pos))
-                            {
-                                EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_PLACED);
-
-                                GameObject instantiatedPrefab = Instantiate(selectedPrefab, pos, Quaternion.Euler(0f, 0f, currentRotation));
-
-                                placedPrefabs.Add(instantiatedPrefab);
-
-                                int prefabID = 0;
-
-                                for (int i = 0; i < itemPrefabs.Length; i++)
-                                {
-                                    if (selectedPrefab == itemPrefabs[i])
-                                    {
-                                        prefabID = i;
-                                    }
-                                }
-
-                                PrefabPlacedData placedData = new PrefabPlacedData();
-
-                                placedData.prefabID = prefabID;
-                                placedData.zRotation = currentRotation;
-
-                                placedPrefabsData.Add(pos, placedData);
-                            }
-                        }
-                        else
-                        {
-                            return;
-                        }
-                    }
-                }
+                return;
             }
+
+            PlacePrefab();
         }
     }
 
     public void OnDeletePrefab(InputAction.CallbackContext _callbackContext)
     {
-        if (isActive && !isHovering && !isDragging)
+        if (!isActive || isHovering || isDragging)
         {
-            if (_callbackContext.phase == InputActionPhase.Started)
+            return;
+        }
+
+        if (_callbackContext.phase == InputActionPhase.Started)
+        {
+            if (GraphicRaycasterCheck.Instance.IsHittingUI())
             {
-                if (!GraphicRaycasterCheck.Instance.IsHittingUI())
-                {
-                    RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, Mathf.Infinity, prefabsLayers);
-
-                    if (hit.collider != null)
-                    {
-                        Debug.Log(hit.transform.name);
-
-                        PlaceablePrefab placeablePrefab = hit.transform.GetComponentInParent<PlaceablePrefab>();
-
-                        if (placeablePrefab != null)
-                        {
-                            EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_DELETED);
-
-                            placedPrefabsData.Remove(placeablePrefab.position);
-
-                            Destroy(placeablePrefab.gameObject);
-                        }
-                    }
-                }
+                return;
             }
+
+            DeletePrefab();
         }
     }
 
@@ -193,6 +143,68 @@ public class PrefabLevelEditor : MonoBehaviour
         }
     }
 
+    private void PlacePrefab()
+    {
+        PlaceablePrefab placeablePrefab = selectedPrefab.GetComponent<PlaceablePrefab>();
+
+        if (placeablePrefab != null)
+        {
+            Vector3Int cellPos = tilemap.WorldToCell(cam.ScreenToWorldPoint(Input.mousePosition));
+
+            Vector3 pos = tilemap.GetCellCenterWorld(cellPos);
+
+            bool canPlace = CanPlace(cellPos, placeablePrefab.leftSizeGet, placeablePrefab.rightSizeGet, placeablePrefab.upSizeGet, placeablePrefab.bottomSizeGet);
+
+            if (canPlace)
+            {
+                if (!placedPrefabsData.ContainsKey(pos))
+                {
+                    EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_PLACED);
+
+                    GameObject instantiatedPrefab = Instantiate(selectedPrefab, pos, Quaternion.Euler(0f, 0f, currentRotation));
+
+                    placedPrefabs.Add(instantiatedPrefab);
+
+                    int prefabID = 0;
+
+                    for (int i = 0; i < itemPrefabs.Length; i++)
+                    {
+                        if (selectedPrefab == itemPrefabs[i])
+                        {
+                            prefabID = i;
+                        }
+                    }
+
+                    PrefabPlacedData placedData = new PrefabPlacedData();
+
+                    placedData.prefabID = prefabID;
+                    placedData.zRotation = currentRotation;
+
+                    placedPrefabsData.Add(pos, placedData);
+                }
+            }
+        }
+    }
+
+    private void DeletePrefab()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, Mathf.Infinity, prefabsLayers);
+
+        if (hit.collider != null)
+        {
+            PlaceablePrefab placeablePrefab = hit.transform.GetComponentInParent<PlaceablePrefab>();
+
+            if (placeablePrefab != null)
+            {
+                EventSystemNew.RaiseEvent(Event_Type.TUTORIAL_PREFAB_DELETED);
+
+                placedPrefabsData.Remove(placeablePrefab.position);
+
+                Destroy(placeablePrefab.gameObject);
+            }
+        }
+    }
+
     private void EquipPrefab(GameObject _prefab)
     {
         foreach (var prefab in itemPrefabs)
@@ -202,7 +214,7 @@ public class PrefabLevelEditor : MonoBehaviour
                 selectedPrefab = prefab;
 
                 currentRotation = 0f;
-            }    
+            }
         }
     }
 
@@ -306,7 +318,7 @@ public class PrefabLevelEditor : MonoBehaviour
 
         for (int i = 0; i < levelData.prefabIDs.Count; i++)
         {
-            LoadPlacedPrefabs(levelData.prefabIDs[i], new Vector3(levelData.positionsX[i], levelData.positionsY[i], 0f), levelData.zRotation[i]);
+            LoadPlacedPrefab(levelData.prefabIDs[i], new Vector3(levelData.positionsX[i], levelData.positionsY[i], 0f), levelData.zRotation[i]);
         }
 
         EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);

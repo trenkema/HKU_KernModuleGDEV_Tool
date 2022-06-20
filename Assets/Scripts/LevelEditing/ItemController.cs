@@ -16,15 +16,7 @@ public class ItemController : MonoBehaviour
 
     [SerializeField] GameObject hoverText;
 
-    [SerializeField] GameObject[] dragImages;
-
-    [SerializeField] Sprite[] itemImages;
-
-    [SerializeField] GameObject[] items;
-
-    [SerializeField] CustomTile[] customTiles;
-
-    [SerializeField] Vector2[] itemImageCustomSizes;
+    [SerializeField] Item[] items;
 
     [SerializeField] Image activeImage;
 
@@ -106,17 +98,17 @@ public class ItemController : MonoBehaviour
 
         if (levelManagerType == LevelManagerType.PrefabManager)
         {
-            EventSystemNew<GameObject>.RaiseEvent(Event_Type.EQUIP_PREFAB, items[_itemID]);
+            EventSystemNew<GameObject>.RaiseEvent(Event_Type.EQUIP_PREFAB, items[_itemID].prefab);
         }
 
         if (levelManagerType == LevelManagerType.TileManager)
         {
-            EventSystemNew<CustomTile>.RaiseEvent(Event_Type.EQUIP_TILE, customTiles[_itemID]);
+            EventSystemNew<CustomTile>.RaiseEvent(Event_Type.EQUIP_TILE, items[_itemID].customTile);
         }
 
-        activeImage.sprite = itemImages[_itemID];
+        activeImage.sprite = items[_itemID].itemImage;
 
-        activeImage.rectTransform.sizeDelta = itemImageCustomSizes[_itemID];
+        activeImage.rectTransform.sizeDelta = items[_itemID].itemImageSize;
 
         EventSystemNew.RaiseEvent(Event_Type.DESTROY_DRAG_IMAGE);
 
@@ -127,35 +119,17 @@ public class ItemController : MonoBehaviour
 
     public void ActivateItem()
     {
-        EventSystemNew<int>.RaiseEvent(Event_Type.ACTIVATE_ITEM_CONTROLLER, itemControllerID);
-
-        StopEditItem();
-
-        if (levelManagerType == LevelManagerType.PrefabManager)
-        {
-            EventSystemNew<GameObject>.RaiseEvent(Event_Type.EQUIP_PREFAB, items[activeItemID]);
-        }
-
-        if (levelManagerType == LevelManagerType.TileManager)
-        {
-            EventSystemNew<CustomTile>.RaiseEvent(Event_Type.EQUIP_TILE, customTiles[activeItemID]);
-        }
-
-        EventSystemNew.RaiseEvent(Event_Type.DESTROY_DRAG_IMAGE);
-
-        InstantiateImage(activeItemID);
-
-        EventSystemNew<LevelManagerType>.RaiseEvent(Event_Type.ENABLE_LEVEL_EDITOR, levelManagerType);
+        SelectItem(activeItemID);
     }
 
     private void InstantiateImage(int _itemID)
     {
-        if (activeDragImage != dragImages[_itemID])
+        if (activeDragImage != items[_itemID].dragImage)
         {
             if (activeDragImage != null)
                 Destroy(activeDragImage);
 
-            activeDragImage = Instantiate(dragImages[_itemID], new Vector3(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y, 0), Quaternion.identity);
+            activeDragImage = Instantiate(items[_itemID].dragImage, new Vector3(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y, 0), Quaternion.identity);
         }
     }
 

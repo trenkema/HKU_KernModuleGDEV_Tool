@@ -137,6 +137,21 @@ public class LevelManager : MonoBehaviour
         });
     }
 
+    private LootLockerAssetResponse GetLevels()
+    {
+        LootLockerAssetResponse assetResponse = null;
+
+        LootLockerSDKManager.GetAssetListWithCount(999999, (response) =>
+        {
+            if (response.success)
+            {
+                assetResponse = response;
+            }
+        }, null, true);
+
+        return assetResponse;
+    }
+
     private void SaveLevel()
     {
         AllLevelData allLevelData = new AllLevelData();
@@ -200,59 +215,58 @@ public class LevelManager : MonoBehaviour
 
         // Check If You Own It
 
-        LootLockerSDKManager.GetAssetListWithCount(999999, (response) =>
+        LootLockerAssetResponse assetResponse = GetLevels();
+
+        if (assetResponse != null)
         {
-            if (response.success)
+            LootLockerSDKManager.GetSingleKeyPersistentStorage("playerID", (playerIDResponse) =>
             {
-                LootLockerSDKManager.GetSingleKeyPersistentStorage("playerID", (playerIDResponse) =>
+                string playerID = "";
+
+                if (playerIDResponse.success)
                 {
-                    string playerID = "";
-
-                    if (playerIDResponse.success)
+                    if (playerIDResponse.payload != null)
                     {
-                        if (playerIDResponse.payload != null)
+                        playerID = playerIDResponse.payload.value;
+
+                        LootLockerSDKManager.GetMemberRank(levelDatabaseID.ToString(), int.Parse(_assetID), (levelResponse) =>
                         {
-                            playerID = playerIDResponse.payload.value;
-
-                            LootLockerSDKManager.GetMemberRank(levelDatabaseID.ToString(), int.Parse(_assetID), (levelResponse) =>
+                            if (levelResponse.statusCode == 200)
                             {
-                                if (levelResponse.statusCode == 200)
+                                for (int i = 0; i < assetResponse.assets.Length; i++)
                                 {
-                                    for (int i = 0; i < response.assets.Length; i++)
+                                    if (i == levelResponse.score)
                                     {
-                                        if (i == levelResponse.score)
+                                        LootLockerCommonAsset asset = assetResponse.assets[i];
+
+                                        if (asset.asset_candidate.created_by_player_id.ToString() == playerID)
                                         {
-                                            LootLockerCommonAsset asset = response.assets[i];
-
-                                            if (asset.asset_candidate.created_by_player_id.ToString() == playerID)
-                                            {
-                                                updateLevelButton.SetActive(true);
-                                            }
-                                            else
-                                            {
-                                                updateLevelButton.SetActive(false);
-                                            }
-
-                                            EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
-
-                                            EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
-                                            EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
+                                            updateLevelButton.SetActive(true);
                                         }
+                                        else
+                                        {
+                                            updateLevelButton.SetActive(false);
+                                        }
+
+                                        EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
+
+                                        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
+                                        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
                                     }
                                 }
-                            });
-                        }
-                        else
-                        {
-                            EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
-
-                            EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
-                            EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
-                        }
+                            }
+                        });
                     }
-                });
-            }
-        }, null, true);
+                    else
+                    {
+                        EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
+
+                        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
+                        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
+                    }
+                }
+            });
+        }
     }
 
     public void CreateLevel()
