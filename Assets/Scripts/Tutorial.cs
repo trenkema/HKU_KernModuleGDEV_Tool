@@ -18,7 +18,7 @@ public class Tutorial : MonoBehaviour
 
     bool waitingForStartPlacement = false;
 
-    bool waitingForFinishplacement = false;
+    bool waitingForFinishPlacement = false;
 
     int grassPlaced = 0;
 
@@ -103,7 +103,7 @@ public class Tutorial : MonoBehaviour
         if (waitingForStartPlacement)
         {
             waitingForStartPlacement = false;
-            waitingForFinishplacement = true;
+            waitingForFinishPlacement = true;
 
             EventSystemNew.Subscribe(Event_Type.TUTORIAL_PREFAB_PLACED, FinishPlaced);
 
@@ -113,9 +113,9 @@ public class Tutorial : MonoBehaviour
 
     private void FinishPlaced()
     {
-        if (waitingForFinishplacement)
+        if (waitingForFinishPlacement)
         {
-            waitingForFinishplacement = false;
+            waitingForFinishPlacement = false;
 
             SetAnimationTrigger(animator, "FinishPlaced");
         }
@@ -128,7 +128,7 @@ public class Tutorial : MonoBehaviour
             SetAnimationTrigger(animator, "StartClicked");
         }
 
-        if (waitingForFinishplacement)
+        if (waitingForFinishPlacement)
         {
             SetAnimationTrigger(animator, "FinishClicked");
         }

@@ -58,8 +58,8 @@ public class LevelManager : MonoBehaviour
     string levelName;
     string playerName;
     int currentAssetID = -1;
-    int startPointAdded = 0;
-    int finishPointAdded = 0;
+    int startPointsAdded = 0;
+    int finishPointsAdded = 0;
     bool retrieveOwnLevelsOnly = false;
     bool isPlaying = false;
 
@@ -167,13 +167,13 @@ public class LevelManager : MonoBehaviour
         }, null, true);
     }
 
-    private void SpawnLevelButton(LootLockerCommonAsset _asset, int _index, Transform _entryContent, bool _isActive, bool _ownLevelsOnly)
+    private void SpawnLevelButton(LootLockerCommonAsset _asset, int _index, bool _isActive, bool _ownLevelsOnly)
     {
         GameObject displayItem = Instantiate(levelEntryDisplayItem, transform.position, Quaternion.identity);
 
         displayItems.Add(displayItem);
 
-        displayItem.transform.SetParent(_entryContent);
+        displayItem.transform.SetParent(levelDataEntryContent);
 
         LevelEntryData levelEntryData = displayItem.GetComponent<LevelEntryData>();
 
@@ -221,11 +221,11 @@ public class LevelManager : MonoBehaviour
                 if (asset.asset_candidate.created_by_player_id.ToString() == _playerID)
                 {
                     bool isActive = levelListResponse.items[i].metadata == "-1" ? false : true;
-                    SpawnLevelButton(asset, i, levelDataEntryContent, isActive, true);
+                    SpawnLevelButton(asset, i, isActive, true);
                 }
                 else if (asset.asset_candidate.created_by_player_id.ToString() != _playerID && levelListResponse.items[i].metadata != "-1" && !retrieveOwnLevelsOnly)
                 {
-                    SpawnLevelButton(asset, i, levelDataEntryContent, false, false);
+                    SpawnLevelButton(asset, i, false, false);
                 }
             }
 
@@ -332,9 +332,9 @@ public class LevelManager : MonoBehaviour
         StartCoroutine(DownloadLevelTextFile(_textFileURL, _levelData.assetID));
     }
 
-    private IEnumerator DownloadLevelTextFile(string textFileURL, string _assetID)
+    private IEnumerator DownloadLevelTextFile(string _textFileURL, string _assetID)
     {
-        UnityWebRequest www = UnityWebRequest.Get(textFileURL);
+        UnityWebRequest www = UnityWebRequest.Get(_textFileURL);
 
         yield return www.SendWebRequest();
 
@@ -419,7 +419,7 @@ public class LevelManager : MonoBehaviour
 
     public void OpenUploadLevelUI()
     {
-        if (startPointAdded == 1 && finishPointAdded == 1)
+        if (startPointsAdded == 1 && finishPointsAdded == 1)
         {
             SaveLevel();
 
@@ -433,7 +433,7 @@ public class LevelManager : MonoBehaviour
 
     public void OpenUpdateLevelUI()
     {
-        if (startPointAdded == 1 && finishPointAdded == 1)
+        if (startPointsAdded == 1 && finishPointsAdded == 1)
         {
             SaveLevel();
 
@@ -449,14 +449,14 @@ public class LevelManager : MonoBehaviour
     {
         missingStartOrFinishUI.SetActive(true);
 
-        startMissing.SetActive(startPointAdded == 0 ? true : false);
-        finishMissing.SetActive(finishPointAdded == 0 ? true : false);
+        startMissing.SetActive(startPointsAdded == 0 ? true : false);
+        finishMissing.SetActive(finishPointsAdded == 0 ? true : false);
 
-        tooManyStartsText.gameObject.SetActive(startPointAdded > 1 ? true : false);
-        tooManyFinishesText.gameObject.SetActive(finishPointAdded > 1 ? true : false);
+        tooManyStartsText.gameObject.SetActive(startPointsAdded > 1 ? true : false);
+        tooManyFinishesText.gameObject.SetActive(finishPointsAdded > 1 ? true : false);
 
-        tooManyStartsText.text = string.Format("- Remove {0} Start Points", startPointAdded - 1);
-        tooManyFinishesText.text = string.Format("- Remove {0} Finish Points", finishPointAdded - 1);
+        tooManyStartsText.text = string.Format("- Remove {0} Start Points", startPointsAdded - 1);
+        tooManyFinishesText.text = string.Format("- Remove {0} Finish Points", finishPointsAdded - 1);
     }
 
     public void UploadLevelData(int _levelID, int _assetID, bool _isPublic)
@@ -570,12 +570,12 @@ public class LevelManager : MonoBehaviour
 
     private void StartAdded(int _amount)
     {
-        startPointAdded += _amount;
+        startPointsAdded += _amount;
     }
 
     private void FinishAdded(int _amount)
     {
-        finishPointAdded += _amount;
+        finishPointsAdded += _amount;
     }
 
     private void LevelCompleted()
@@ -674,7 +674,7 @@ public class LevelManager : MonoBehaviour
 
     public void StartGame()
     {
-        if (startPointAdded == 1 && finishPointAdded == 1)
+        if (startPointsAdded == 1 && finishPointsAdded == 1)
         {
             audioSource.time = 0;
             audioSource.Play();
@@ -699,15 +699,15 @@ public class LevelManager : MonoBehaviour
         {
             missingStartOrFinishUI.SetActive(true);
 
-            startMissing.SetActive(startPointAdded == 0 ? true : false);
-            finishMissing.SetActive(finishPointAdded == 0 ? true : false);
+            startMissing.SetActive(startPointsAdded == 0 ? true : false);
+            finishMissing.SetActive(finishPointsAdded == 0 ? true : false);
 
 
-            tooManyStartsText.gameObject.SetActive(startPointAdded > 1 ? true : false);
-            tooManyFinishesText.gameObject.SetActive(finishPointAdded > 1 ? true : false);
+            tooManyStartsText.gameObject.SetActive(startPointsAdded > 1 ? true : false);
+            tooManyFinishesText.gameObject.SetActive(finishPointsAdded > 1 ? true : false);
 
-            tooManyStartsText.text = string.Format("- Remove {0} Start Points", startPointAdded - 1);
-            tooManyFinishesText.text = string.Format("- Remove {0} Finish Points", finishPointAdded - 1);
+            tooManyStartsText.text = string.Format("- Remove {0} Start Points", startPointsAdded - 1);
+            tooManyFinishesText.text = string.Format("- Remove {0} Finish Points", finishPointsAdded - 1);
         }
     }
 

@@ -58,11 +58,6 @@ public class LevelEntryData : MonoBehaviour
         EventSystemNew<string>.RaiseEvent(Event_Type.ACTIVATE_LEVEL, assetID);
     }
 
-    public void FavoriteLevel()
-    {
-        EventSystemNew<string>.RaiseEvent(Event_Type.FAVORITE_LEVEL, assetID);
-    }
-
     public void EnableDeleteButton()
     {
         deleteButton.SetActive(true);

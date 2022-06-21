@@ -242,12 +242,4 @@ public class PlayerMovement : MonoBehaviour
     {
         hasDied = true;
     }
-
-    //private void OnDrawGizmosSelected()
-    //{
-    //    // Wall Jumping Colliders
-    //    Gizmos.color = Color.green;
-    //    Gizmos.DrawCube(new Vector2(gameObject.transform.position.x - (coll.bounds.size.x / 2), gameObject.transform.position.y), new Vector2(0.25f, 1f));
-    //    Gizmos.DrawCube(new Vector2(gameObject.transform.position.x + (coll.bounds.size.x / 2), gameObject.transform.position.y), new Vector2(0.25f, 1f));
-    //}
 }
