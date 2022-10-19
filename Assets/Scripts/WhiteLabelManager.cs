@@ -34,7 +34,7 @@ public class WhiteLabelManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI loginErrorText;
     [SerializeField] TextMeshProUGUI registerErrorText;
 
-    int playerDatabaseID = 2559;
+    int playerDatabaseID = 7942;
 
     string playerName = "";
 

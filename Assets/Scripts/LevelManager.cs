@@ -37,9 +37,10 @@ public class LevelManager : MonoBehaviour
     [Header("UI's")]
     [SerializeField] GameObject editorUI;
     [SerializeField] GameObject inGameUI;
-    [SerializeField] GameObject loadingLevelUI;
-    [SerializeField] GameObject uploadingLevelUI;
-    [SerializeField] GameObject updatingLevelUI;
+    [SerializeField] GameObject modifyingLevelBox;
+    [SerializeField] GameObject loadingLevelText;
+    [SerializeField] GameObject uploadingLevelText;
+    [SerializeField] GameObject updatingLevelText;
     [SerializeField] GameObject downloadingLevelsUI;
     [SerializeField] GameObject updateLevelUI;
     [SerializeField] GameObject levelUploadUI;
@@ -54,7 +55,7 @@ public class LevelManager : MonoBehaviour
 
     List<GameObject> displayItems = new List<GameObject>();
 
-    int levelDatabaseID = 2881;
+    int levelDatabaseID = 7943;
     string levelName;
     string playerName;
     int currentAssetID = -1;
@@ -117,7 +118,7 @@ public class LevelManager : MonoBehaviour
                 {
                     if (_assets.assets[i].storage[ii].key == "assetID")
                     {
-                        if (_assets.ToString() == _assets.assets[i].storage[ii].value)
+                        if (currentAssetID.ToString() == _assets.assets[i].storage[ii].value)
                         {
                             LootLockerSDKManager.UpdateOrCreateKeyValue("playerID", (_assets.assets[i].asset_candidate.created_by_player_id).ToString(), (getPersistentStorageResponse) =>
                             {
@@ -137,12 +138,17 @@ public class LevelManager : MonoBehaviour
         {
             if (playerPayLoad.success)
             {
-                payLoad = playerPayLoad.payload;
+                if (playerPayLoad.payload != null)
+                {
+                    payLoad = playerPayLoad.payload;
+                }
 
                 OnDone?.Invoke(payLoad);
             }
             else
             {
+                Debug.Log("Storage Failed");
+
                 OnDone?.Invoke(payLoad);
             }
         });
@@ -218,6 +224,14 @@ public class LevelManager : MonoBehaviour
             {
                 LootLockerCommonAsset asset = _assets.assets[levelListResponse.items[i].score];
 
+                if (_playerID == "-1" && !retrieveOwnLevelsOnly)
+                {
+                    Debug.Log("New Account");
+
+                    SpawnLevelButton(asset, i, false, false);
+                    continue;
+                }
+
                 if (asset.asset_candidate.created_by_player_id.ToString() == _playerID)
                 {
                     bool isActive = levelListResponse.items[i].metadata == "-1" ? false : true;
@@ -248,13 +262,12 @@ public class LevelManager : MonoBehaviour
 
                     updateLevelButton.SetActive(true);
 
-                    uploadingLevelUI.SetActive(false);
-                    updatingLevelUI.SetActive(false);
+                    modifyingLevelBox.SetActive(false);
+                    uploadingLevelText.SetActive(false);
+                    updatingLevelText.SetActive(false);
 
                     EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
                     EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
-
-                    EventSystemNew<string>.RaiseEvent(Event_Type.DEACTIVATE_LEVEL, _assetID.ToString());
                 });
 
                 break;
@@ -303,7 +316,7 @@ public class LevelManager : MonoBehaviour
         allLevelData.tileLevelData = TileLevelManager.Instance.SaveLevel();
         allLevelData.prefabLevelData = PrefabLevelEditor.Instance.SaveLevel();
 
-        string json = JsonUtility.ToJson(allLevelData, true);
+        string json = JsonUtility.ToJson(allLevelData, false);
 
         File.WriteAllText(Application.dataPath + "/LevelData.json", json);
     }
@@ -311,7 +324,8 @@ public class LevelManager : MonoBehaviour
     private void SetLoadingScreen(bool _isActive)
     {
         downloadLevelUI.SetActive(false);
-        loadingLevelUI.SetActive(_isActive);
+        modifyingLevelBox.SetActive(_isActive);
+        loadingLevelText.SetActive(_isActive);
     }
 
     private void LoadLevel()
@@ -366,6 +380,15 @@ public class LevelManager : MonoBehaviour
             {
                 GetPlayerStorage((playerData) =>
                 {
+                    if (playerData == null)
+                    {
+                        EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, false);
+
+                        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
+                        EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
+                        return;
+                    }
+
                     string playerID = playerData.value == null ? string.Empty : playerData.value;
 
                     if (playerID != string.Empty)
@@ -386,7 +409,8 @@ public class LevelManager : MonoBehaviour
 
     public void CreateLevel()
     {
-        uploadingLevelUI.SetActive(true);
+        modifyingLevelBox.SetActive(true);
+        uploadingLevelText.SetActive(true);
 
         levelName = levelNameInputField.text;
 
@@ -494,6 +518,11 @@ public class LevelManager : MonoBehaviour
                             return;
                         }
 
+                        if (!_isPublic)
+                        {
+                            DeactiveLevel(_assetID.ToString());
+                        }
+
                         LootLockerAssetResponse assetResponse = null;
 
                         GetLevels((levelData) =>
@@ -506,7 +535,7 @@ public class LevelManager : MonoBehaviour
 
                                 GetPlayerStorage((playerData) =>
                                 {
-                                    if (playerData != null)
+                                    if (playerData == null)
                                     {
                                         SetPlayerID(assetResponse);
                                     }
@@ -540,6 +569,12 @@ public class LevelManager : MonoBehaviour
             {
                 GetPlayerStorage((playerData) =>
                 {
+                    if (playerData == null)
+                    {
+                        GetScoreboardLevels(assetResponse, "-1");
+                        return;
+                    }
+
                     string playerID = playerData.value == null ? string.Empty : playerData.value;
 
                     if (playerID != string.Empty)
@@ -639,7 +674,8 @@ public class LevelManager : MonoBehaviour
 
             LoadLevel();
 
-            loadingLevelUI.SetActive(false);
+            modifyingLevelBox.SetActive(false);
+            loadingLevelText.SetActive(false);
 
             editorUI.SetActive(true);
 
@@ -653,21 +689,7 @@ public class LevelManager : MonoBehaviour
         {
             if (isPlaying)
             {
-                audioSource.Stop();
-
-                isPlaying = false;
-
-                levelCompletedUI.SetActive(false);
-
-                gameOverUI.SetActive(false);
-
-                LoadLevel();
-
-                loadingLevelUI.SetActive(false);
-
-                editorUI.SetActive(true);
-
-                inGameUI.SetActive(false);
+                EditGame();
             }
         }
     }
@@ -720,7 +742,8 @@ public class LevelManager : MonoBehaviour
 
     public void UpdateLevel()
     {
-        updatingLevelUI.SetActive(true);
+        modifyingLevelBox.SetActive(true);
+        updatingLevelText.SetActive(true);
 
         SaveLevel();
 

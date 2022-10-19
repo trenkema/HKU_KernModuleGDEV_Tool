@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 7194daef9c3d0eb459224836a9b03c58
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Vremena Grotesk
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 6d23d17955e6e1b4d8592f269fd5918e, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

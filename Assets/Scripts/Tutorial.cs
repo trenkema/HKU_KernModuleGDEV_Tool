@@ -47,6 +47,14 @@ public class Tutorial : MonoBehaviour
         EventSystemNew.Unsubscribe(Event_Type.TUTORIAL_PREFAB_PLACED, FinishPlaced);
     }
 
+    private void Awake()
+    {
+        if (PlayerPrefs.GetInt("Tutorial", 0) == 0)
+        {
+            SetAnimationTrigger(animator, "FadeIn");
+        }
+    }
+
     public void StartTutorial()
     {
         SetAnimationTrigger(animator, "StartTutorial");
@@ -132,6 +140,12 @@ public class Tutorial : MonoBehaviour
         {
             SetAnimationTrigger(animator, "FinishClicked");
         }
+    }
+
+    public void FinishTutorial()
+    {
+        PlayerPrefs.SetInt("Tutorial", 1);
+        PlayerPrefs.Save();
     }
 
     private void SetAnimationTrigger(Animator _animator, string _trigger)
