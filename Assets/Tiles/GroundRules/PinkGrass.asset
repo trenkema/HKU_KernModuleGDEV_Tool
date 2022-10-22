@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tile: {fileID: 11400000, guid: c2cd949d7eda05f48a07c34d2e7c6d71, type: 2}
   id: PinkGrass
+  index: 2
   tilemap: 30

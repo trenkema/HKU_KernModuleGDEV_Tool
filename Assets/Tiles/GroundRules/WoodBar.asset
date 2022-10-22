@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tile: {fileID: 11400000, guid: 748cd43d25ab20a43aacef5a59f6b7fb, type: 2}
   id: WoodBar
+  index: 3
   tilemap: 20

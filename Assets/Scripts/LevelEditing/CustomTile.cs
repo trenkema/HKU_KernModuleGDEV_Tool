@@ -8,5 +8,6 @@ public class CustomTile : ScriptableObject
 {
     public TileBase tile;
     public string id;
+    public int index;
     public Tilemaps tilemap;
 }

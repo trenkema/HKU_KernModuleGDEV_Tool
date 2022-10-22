@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tile: {fileID: 11400000, guid: 7bad61db2a6c48c41b98f6e1d6867ed2, type: 2}
   id: BrownBG
+  index: 5
   tilemap: 10

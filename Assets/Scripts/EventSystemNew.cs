@@ -6,7 +6,6 @@ public enum Event_Type
 {
     EQUIP_PREFAB,
     EQUIP_TILE,
-    LOAD_PREFABS,
     ENABLE_LEVEL_EDITOR,
 
     ACTIVATE_ITEM_CONTROLLER,
@@ -15,10 +14,12 @@ public enum Event_Type
 
     LOADING_SCREEN,
 
-    LOAD_LEVEL,
+    LOAD_LEVEL_DATA,
     DEACTIVATE_LEVEL,
     ACTIVATE_LEVEL,
-    FAVORITE_LEVEL,
+
+    LOAD_LEVEL,
+    SAVE_LEVEL,
 
     START_ADDED,
     FINISH_ADDED,
@@ -30,8 +31,6 @@ public enum Event_Type
 
     CHARACTER_FINISHED,
     CHARACTER_DIED,
-
-    ASSET_ID,
 
     TOGGLE_DRAGGING,
     STOP_ITEMS,

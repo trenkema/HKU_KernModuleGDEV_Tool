@@ -71,7 +71,7 @@ public class TileLevelManager : MonoBehaviour
 
                     if (tempTile != null)
                     {
-                        layerData.tiles.Add(tempTile.id);
+                        layerData.tiles.Add(tempTile.index);
                         layerData.positionsX.Add(x);
                         layerData.positionsY.Add(y);
                     }
@@ -97,7 +97,7 @@ public class TileLevelManager : MonoBehaviour
 
             for (int i = 0; i < layerData.tiles.Count; i++)
             {
-                TileBase tile = tiles.Find(t => t.id == layerData.tiles[i]).tile;
+                TileBase tile = tiles.Find(t => t.index == layerData.tiles[i]).tile;
 
                 if (tile)
                 {
@@ -118,7 +118,7 @@ public class TileLevelData
 public class TileLayerData
 {
     public int layerID;
-    public List<string> tiles = new List<string>();
+    public List<int> tiles = new List<int>();
     public List<int> positionsX = new List<int>();
     public List<int> positionsY = new List<int>();
 

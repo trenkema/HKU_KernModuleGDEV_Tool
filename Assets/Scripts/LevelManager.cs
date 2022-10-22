@@ -67,7 +67,7 @@ public class LevelManager : MonoBehaviour
     private void OnEnable()
     {
         EventSystemNew<bool>.Subscribe(Event_Type.LOADING_SCREEN, SetLoadingScreen);
-        EventSystemNew<string, LevelEntryData>.Subscribe(Event_Type.LOAD_LEVEL, LoadLevelData);
+        EventSystemNew<string, LevelEntryData>.Subscribe(Event_Type.LOAD_LEVEL_DATA, LoadLevelData);
         EventSystemNew<string>.Subscribe(Event_Type.DEACTIVATE_LEVEL, DeactiveLevel);
         EventSystemNew<string>.Subscribe(Event_Type.ACTIVATE_LEVEL, ActivateLevel);
         EventSystemNew<int>.Subscribe(Event_Type.START_ADDED, StartAdded);
@@ -79,7 +79,7 @@ public class LevelManager : MonoBehaviour
     private void OnDisable()
     {
         EventSystemNew<bool>.Unsubscribe(Event_Type.LOADING_SCREEN, SetLoadingScreen);
-        EventSystemNew<string, LevelEntryData>.Unsubscribe(Event_Type.LOAD_LEVEL, LoadLevelData);
+        EventSystemNew<string, LevelEntryData>.Unsubscribe(Event_Type.LOAD_LEVEL_DATA, LoadLevelData);
         EventSystemNew<string>.Unsubscribe(Event_Type.DEACTIVATE_LEVEL, DeactiveLevel);
         EventSystemNew<string>.Unsubscribe(Event_Type.ACTIVATE_LEVEL, ActivateLevel);
         EventSystemNew<int>.Unsubscribe(Event_Type.START_ADDED, StartAdded);
@@ -309,33 +309,11 @@ public class LevelManager : MonoBehaviour
         });
     }
 
-    private void SaveLevel()
-    {
-        AllLevelData allLevelData = new AllLevelData();
-
-        allLevelData.tileLevelData = TileLevelManager.Instance.SaveLevel();
-        allLevelData.prefabLevelData = PrefabLevelEditor.Instance.SaveLevel();
-
-        string json = JsonUtility.ToJson(allLevelData, false);
-
-        File.WriteAllText(Application.dataPath + "/LevelData.json", json);
-    }
-
     private void SetLoadingScreen(bool _isActive)
     {
         downloadLevelUI.SetActive(false);
         modifyingLevelBox.SetActive(_isActive);
         loadingLevelText.SetActive(_isActive);
-    }
-
-    private void LoadLevel()
-    {
-        string json = File.ReadAllText(Application.dataPath + "/LevelData.json");
-
-        AllLevelData levelData = JsonUtility.FromJson<AllLevelData>(json);
-
-        TileLevelManager.Instance.LoadLevel(levelData.tileLevelData);
-        PrefabLevelEditor.Instance.LoadLevel(levelData.prefabLevelData);
     }
 
     private void LoadLevelData(string _textFileURL, LevelEntryData _levelData)
@@ -445,7 +423,7 @@ public class LevelManager : MonoBehaviour
     {
         if (startPointsAdded == 1 && finishPointsAdded == 1)
         {
-            SaveLevel();
+            EventSystemNew.RaiseEvent(Event_Type.SAVE_LEVEL);
 
             StartCoroutine(WaitScreenshot(levelUploadUI));
         }
@@ -459,7 +437,7 @@ public class LevelManager : MonoBehaviour
     {
         if (startPointsAdded == 1 && finishPointsAdded == 1)
         {
-            SaveLevel();
+            EventSystemNew.RaiseEvent(Event_Type.SAVE_LEVEL);
 
             StartCoroutine(WaitScreenshot(updateLevelUI));
         }
@@ -634,7 +612,7 @@ public class LevelManager : MonoBehaviour
 
             gameOverUI.SetActive(false);
 
-            LoadLevel();
+            EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
 
             StartGame();
         }
@@ -653,7 +631,7 @@ public class LevelManager : MonoBehaviour
 
                 gameOverUI.SetActive(false);
 
-                LoadLevel();
+                EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
 
                 StartGame();
             }
@@ -672,7 +650,7 @@ public class LevelManager : MonoBehaviour
 
             gameOverUI.SetActive(false);
 
-            LoadLevel();
+            EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
 
             modifyingLevelBox.SetActive(false);
             loadingLevelText.SetActive(false);
@@ -707,7 +685,7 @@ public class LevelManager : MonoBehaviour
 
             EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, true);
 
-            SaveLevel();
+            EventSystemNew.RaiseEvent(Event_Type.SAVE_LEVEL);
 
             EventSystemNew.RaiseEvent(Event_Type.GAME_STARTED);
 
@@ -745,7 +723,7 @@ public class LevelManager : MonoBehaviour
         modifyingLevelBox.SetActive(true);
         updatingLevelText.SetActive(true);
 
-        SaveLevel();
+        EventSystemNew.RaiseEvent(Event_Type.SAVE_LEVEL);
 
         LootLockerSDKManager.CreatingAnAssetCandidate(levelName, (response) =>
         {

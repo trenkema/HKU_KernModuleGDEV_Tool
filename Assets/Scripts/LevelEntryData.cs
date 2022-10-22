@@ -45,7 +45,7 @@ public class LevelEntryData : MonoBehaviour
     {
         EventSystemNew<bool>.RaiseEvent(Event_Type.LOADING_SCREEN, true);
 
-        EventSystemNew<string, LevelEntryData>.RaiseEvent(Event_Type.LOAD_LEVEL, textFileURL, this);
+        EventSystemNew<string, LevelEntryData>.RaiseEvent(Event_Type.LOAD_LEVEL_DATA, textFileURL, this);
     }
 
     public void DeactiveLevel()
