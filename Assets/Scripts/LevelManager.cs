@@ -34,22 +34,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Toggle updateLevelToggle;
     [SerializeField] Toggle uploadLevelToggle;
 
-    [Header("UI's")]
-    [SerializeField] GameObject editorUI;
-    [SerializeField] GameObject inGameUI;
-    [SerializeField] GameObject modifyingLevelBox;
-    [SerializeField] GameObject loadingLevelText;
-    [SerializeField] GameObject uploadingLevelText;
-    [SerializeField] GameObject updatingLevelText;
-    [SerializeField] GameObject downloadingLevelsUI;
-    [SerializeField] GameObject updateLevelUI;
-    [SerializeField] GameObject levelUploadUI;
-    [SerializeField] GameObject downloadLevelUI;
-    [SerializeField] GameObject failedToLoadUI;
-    [SerializeField] GameObject levelCompletedUI;
-    [SerializeField] GameObject gameOverUI;
-    [SerializeField] GameObject manualScreenshotUI;
-
     [SerializeField] GameObject levelEntryDisplayItem;
     [SerializeField] Transform levelDataEntryContent;
 
@@ -92,7 +76,7 @@ public class LevelManager : MonoBehaviour
     {
         pageSelector.SetActive(false);
 
-        manualScreenshotUI.SetActive(false);
+        HUDManager.Instance.manualScreenshotUI.SetActive(false);
 
         updateLevelButton.SetActive(false);
 
@@ -100,7 +84,7 @@ public class LevelManager : MonoBehaviour
         {
             if (!response.success)
             {
-                failedToLoadUI.SetActive(true);
+                HUDManager.Instance.failedToLoadUI.SetActive(true);
                 return;
             }
 
@@ -262,9 +246,9 @@ public class LevelManager : MonoBehaviour
 
                     updateLevelButton.SetActive(true);
 
-                    modifyingLevelBox.SetActive(false);
-                    uploadingLevelText.SetActive(false);
-                    updatingLevelText.SetActive(false);
+                    HUDManager.Instance.modifyingLevelBox.SetActive(false);
+                    HUDManager.Instance.uploadingLevelText.SetActive(false);
+                    HUDManager.Instance.updatingLevelText.SetActive(false);
 
                     EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_DRAGGING, true);
                     EventSystemNew<bool>.RaiseEvent(Event_Type.TOGGLE_ZOOM, true);
@@ -311,9 +295,9 @@ public class LevelManager : MonoBehaviour
 
     private void SetLoadingScreen(bool _isActive)
     {
-        downloadLevelUI.SetActive(false);
-        modifyingLevelBox.SetActive(_isActive);
-        loadingLevelText.SetActive(_isActive);
+        HUDManager.Instance.downloadLevelUI.SetActive(false);
+        HUDManager.Instance.modifyingLevelBox.SetActive(_isActive);
+        HUDManager.Instance.loadingLevelText.SetActive(_isActive);
     }
 
     private void LoadLevelData(string _textFileURL, LevelEntryData _levelData)
@@ -387,8 +371,8 @@ public class LevelManager : MonoBehaviour
 
     public void CreateLevel()
     {
-        modifyingLevelBox.SetActive(true);
-        uploadingLevelText.SetActive(true);
+        HUDManager.Instance.modifyingLevelBox.SetActive(true);
+        HUDManager.Instance.uploadingLevelText.SetActive(true);
 
         levelName = levelNameInputField.text;
 
@@ -425,7 +409,7 @@ public class LevelManager : MonoBehaviour
         {
             EventSystemNew.RaiseEvent(Event_Type.SAVE_LEVEL);
 
-            StartCoroutine(WaitScreenshot(levelUploadUI));
+            StartCoroutine(WaitScreenshot(HUDManager.Instance.levelUploadUI));
         }
         else
         {
@@ -439,7 +423,7 @@ public class LevelManager : MonoBehaviour
         {
             EventSystemNew.RaiseEvent(Event_Type.SAVE_LEVEL);
 
-            StartCoroutine(WaitScreenshot(updateLevelUI));
+            StartCoroutine(WaitScreenshot(HUDManager.Instance.updateLevelUI));
         }
         else
         {
@@ -528,7 +512,7 @@ public class LevelManager : MonoBehaviour
     public void DownloadLevelData()
     {
         pageSelector.SetActive(false);
-        downloadingLevelsUI.SetActive(true);
+        HUDManager.Instance.downloadingLevelsUI.SetActive(true);
 
         foreach (var displayItem in displayItems)
         {
@@ -567,7 +551,7 @@ public class LevelManager : MonoBehaviour
     private void AssetsDownloaded()
     {
         pageSelector.SetActive(true);
-        downloadingLevelsUI.SetActive(false);
+        HUDManager.Instance.downloadingLevelsUI.SetActive(false);
     }
 
     IEnumerator LoadLevelIcon(string _imageURl, Image _levelImage)
@@ -593,12 +577,12 @@ public class LevelManager : MonoBehaviour
 
     private void LevelCompleted()
     {
-        levelCompletedUI.SetActive(true);
+        HUDManager.Instance.levelCompletedUI.SetActive(true);
     }
 
     private void LevelFailed()
     {
-        gameOverUI.SetActive(true);
+        HUDManager.Instance.gameOverUI.SetActive(true);
     }
 
     public void RestartGame()
@@ -608,9 +592,9 @@ public class LevelManager : MonoBehaviour
             audioSource.time = 0;
             audioSource.Play();
 
-            levelCompletedUI.SetActive(false);
+            HUDManager.Instance.levelCompletedUI.SetActive(false);
 
-            gameOverUI.SetActive(false);
+            HUDManager.Instance.gameOverUI.SetActive(false);
 
             EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
 
@@ -627,9 +611,9 @@ public class LevelManager : MonoBehaviour
                 audioSource.time = 0;
                 audioSource.Play();
 
-                levelCompletedUI.SetActive(false);
+                HUDManager.Instance.levelCompletedUI.SetActive(false);
 
-                gameOverUI.SetActive(false);
+                HUDManager.Instance.gameOverUI.SetActive(false);
 
                 EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
 
@@ -646,18 +630,18 @@ public class LevelManager : MonoBehaviour
 
             isPlaying = false;
 
-            levelCompletedUI.SetActive(false);
+            HUDManager.Instance.levelCompletedUI.SetActive(false);
 
-            gameOverUI.SetActive(false);
+            HUDManager.Instance.gameOverUI.SetActive(false);
 
             EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
 
-            modifyingLevelBox.SetActive(false);
-            loadingLevelText.SetActive(false);
+            HUDManager.Instance.modifyingLevelBox.SetActive(false);
+            HUDManager.Instance.loadingLevelText.SetActive(false);
 
-            editorUI.SetActive(true);
+            HUDManager.Instance.editorUI.SetActive(true);
 
-            inGameUI.SetActive(false);
+            HUDManager.Instance.inGameUI.SetActive(false);
         }
     }
 
@@ -691,9 +675,9 @@ public class LevelManager : MonoBehaviour
 
             EventSystemNew.RaiseEvent(Event_Type.DESTROY_DRAG_IMAGE);
 
-            editorUI.SetActive(false);
+            HUDManager.Instance.editorUI.SetActive(false);
 
-            inGameUI.SetActive(true);
+            HUDManager.Instance.inGameUI.SetActive(true);
         }
         else
         {
@@ -720,8 +704,8 @@ public class LevelManager : MonoBehaviour
 
     public void UpdateLevel()
     {
-        modifyingLevelBox.SetActive(true);
-        updatingLevelText.SetActive(true);
+        HUDManager.Instance.modifyingLevelBox.SetActive(true);
+        HUDManager.Instance.updatingLevelText.SetActive(true);
 
         EventSystemNew.RaiseEvent(Event_Type.SAVE_LEVEL);
 
@@ -786,13 +770,13 @@ public class LevelManager : MonoBehaviour
 
     private IEnumerator ManualScreenshot()
     {
-        manualScreenshotUI.SetActive(false);
+        HUDManager.Instance.manualScreenshotUI.SetActive(false);
 
         TakeScreenshot();
 
         yield return new WaitForSeconds(0.25f);
 
-        editorUI.SetActive(true);
+        HUDManager.Instance.editorUI.SetActive(true);
     }
 
     public void QuitGame()
