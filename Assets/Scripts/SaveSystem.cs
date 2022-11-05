@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using Assets.SimpleZip;
 
 public class SaveSystem : MonoBehaviour
 {
@@ -28,14 +28,24 @@ public class SaveSystem : MonoBehaviour
 
         string json = JsonUtility.ToJson(allLevelData, false);
 
-        File.WriteAllText(Application.dataPath + "/LevelData.json", json);
+        Debug.Log("Old Length: " + json.Length);
+
+        var compressedJson = Zip.CompressToString(json);
+
+        Debug.Log("New Length: " + compressedJson.Length);
+
+        //var decompressedJson = Zip.Decompress(compressedJson);
+
+        File.WriteAllText(Application.dataPath + "/LevelData.txt", compressedJson);
     }
 
     private void LoadLevel()
     {
-        string json = File.ReadAllText(Application.dataPath + "/LevelData.json");
+        string json = File.ReadAllText(Application.dataPath + "/LevelData.txt");
 
-        AllLevelData levelData = JsonUtility.FromJson<AllLevelData>(json);
+        var decompressedJson = Zip.Decompress(json);
+
+        AllLevelData levelData = JsonUtility.FromJson<AllLevelData>(decompressedJson);
 
         TileLevelManager.Instance.LoadLevel(levelData.tileLevelData);
         PrefabLevelEditor.Instance.LoadLevel(levelData.prefabLevelData);

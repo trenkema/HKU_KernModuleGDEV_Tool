@@ -8,6 +8,7 @@ using TMPro;
 using UnityEngine.Networking;
 using UnityEditor;
 using UnityEngine.InputSystem;
+using Assets.SimpleZip;
 
 public enum LevelManagerType
 {
@@ -314,7 +315,7 @@ public class LevelManager : MonoBehaviour
 
         yield return www.SendWebRequest();
 
-        string filePath = Application.dataPath + "/" + "LevelData.json";
+        string filePath = Application.dataPath + "/" + "LevelData.txt";
 
         File.WriteAllText(filePath, www.downloadHandler.text);
 
@@ -324,9 +325,11 @@ public class LevelManager : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        string json = File.ReadAllText(Application.dataPath + "/LevelData.json");
+        string json = File.ReadAllText(Application.dataPath + "/LevelData.txt");
 
-        AllLevelData levelData = JsonUtility.FromJson<AllLevelData>(json);
+        var decompressedJson = Zip.Decompress(json);
+
+        AllLevelData levelData = JsonUtility.FromJson<AllLevelData>(decompressedJson);
 
         TileLevelManager.Instance.LoadLevel(levelData.tileLevelData);
         PrefabLevelEditor.Instance.LoadLevel(levelData.prefabLevelData);
@@ -458,11 +461,11 @@ public class LevelManager : MonoBehaviour
                 return;
             }
 
-            string textFilePath = Application.dataPath + "/" + "LevelData.json";
+            string textFilePath = Application.dataPath + "/" + "LevelData.txt";
 
             LootLocker.LootLockerEnums.FilePurpose textFileType = LootLocker.LootLockerEnums.FilePurpose.file;
 
-            LootLockerSDKManager.AddingFilesToAssetCandidates(_levelID, textFilePath, "LevelData.json", textFileType, (textResponse) =>
+            LootLockerSDKManager.AddingFilesToAssetCandidates(_levelID, textFilePath, "LevelData.txt", textFileType, (textResponse) =>
             {
                 if (!textResponse.success)
                 {
