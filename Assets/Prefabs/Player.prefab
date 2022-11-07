@@ -195,6 +195,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 5649412278859294491}
+  deathZoneY: -200
   collectClip: {fileID: 8300000, guid: ffb159a21c8a04135a5616979c828fab, type: 3}
   deathClip: {fileID: 8300000, guid: 4b4dd7245f6104c8c8eb07ccf6b386ed, type: 3}
   audioSource: {fileID: 5649412278859294693}
@@ -207,7 +208,7 @@ AudioSource:
   m_GameObject: {fileID: 5649412278859294493}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -4074890785095852469, guid: 916b79dcfef97bc4f910b5ded83190a7, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 0.2
@@ -415,6 +416,18 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: c68385ad-677c-4d5c-9b69-bb9317fd0fa4
     m_ActionName: UI/Navigate (Controller)[/DualShock4GamepadHID/leftStick/down,/DualShock4GamepadHID/rightStick/down,/DualShock4GamepadHID/leftStick/right,/DualShock4GamepadHID/rightStick/right,/DualShock4GamepadHID/dpad/down,/Keyboard/downArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0c9d5f5d-4d2a-4890-939a-3b7eb0aad44e
+    m_ActionName: PlayerControls/QuickRestart[/Keyboard/q]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 86044a7a-bbec-44ee-b62d-4b160093ba11
+    m_ActionName: PlayerControls/QuickEdit[/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 753e25e7-d9f6-4f8c-a77e-85111cb521e6
+    m_ActionName: UI/MousePosition[/Mouse/position]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerControls

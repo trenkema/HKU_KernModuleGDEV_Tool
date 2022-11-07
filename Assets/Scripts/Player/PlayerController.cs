@@ -86,11 +86,12 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Collectable") && canDie)
+        if (collision.CompareTag("Collectable") && canDie && collision.TryGetComponent(out Collectable collectable))
         {
-            audioSource.PlayOneShot(collectClip);
-
-            Destroy(collision.gameObject);
+            if (collectable.pickupable)
+            {
+                audioSource.PlayOneShot(collectClip);
+            }
         }
     }
 }

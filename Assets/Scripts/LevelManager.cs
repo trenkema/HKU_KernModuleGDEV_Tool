@@ -49,6 +49,8 @@ public class LevelManager : MonoBehaviour
     bool retrieveOwnLevelsOnly = false;
     bool isPlaying = false;
 
+    int pageIndex = 0;
+
     private void OnEnable()
     {
         EventSystemNew<bool>.Subscribe(Event_Type.LOADING_SCREEN, SetLoadingScreen);
@@ -158,7 +160,7 @@ public class LevelManager : MonoBehaviour
         }, null, true);
     }
 
-    private void SpawnLevelButton(LootLockerCommonAsset _asset, int _index, bool _isActive, bool _ownLevelsOnly)
+    private void InstantiateLevelButton(LootLockerCommonAsset _asset, int _index, bool _isActive, bool _ownLevelsOnly)
     {
         GameObject displayItem = Instantiate(levelEntryDisplayItem, transform.position, Quaternion.identity);
 
@@ -213,18 +215,18 @@ public class LevelManager : MonoBehaviour
                 {
                     Debug.Log("New Account");
 
-                    SpawnLevelButton(asset, i, false, false);
+                    InstantiateLevelButton(asset, i, false, false);
                     continue;
                 }
 
                 if (asset.asset_candidate.created_by_player_id.ToString() == _playerID)
                 {
                     bool isActive = levelListResponse.items[i].metadata == "-1" ? false : true;
-                    SpawnLevelButton(asset, i, isActive, true);
+                    InstantiateLevelButton(asset, i, isActive, true);
                 }
                 else if (asset.asset_candidate.created_by_player_id.ToString() != _playerID && levelListResponse.items[i].metadata != "-1" && !retrieveOwnLevelsOnly)
                 {
-                    SpawnLevelButton(asset, i, false, false);
+                    InstantiateLevelButton(asset, i, false, false);
                 }
             }
 
@@ -323,16 +325,9 @@ public class LevelManager : MonoBehaviour
         AssetDatabase.Refresh();
 #endif
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.1f);
 
-        string json = File.ReadAllText(Application.dataPath + "/LevelData.txt");
-
-        var decompressedJson = Zip.Decompress(json);
-
-        AllLevelData levelData = JsonUtility.FromJson<AllLevelData>(decompressedJson);
-
-        TileLevelManager.Instance.LoadLevel(levelData.tileLevelData);
-        PrefabLevelEditor.Instance.LoadLevel(levelData.prefabLevelData);
+        EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
 
         // Check If You Own It
         LootLockerAssetResponse assetResponse = null;
@@ -378,6 +373,8 @@ public class LevelManager : MonoBehaviour
         HUDManager.Instance.uploadingLevelText.SetActive(true);
 
         levelName = levelNameInputField.text;
+
+        levelNameInputField.text = string.Empty;
 
         LootLockerSDKManager.CreatingAnAssetCandidate(levelName, (response) =>
         {

@@ -28,13 +28,7 @@ public class SaveSystem : MonoBehaviour
 
         string json = JsonUtility.ToJson(allLevelData, false);
 
-        Debug.Log("Old Length: " + json.Length);
-
         var compressedJson = Zip.CompressToString(json);
-
-        Debug.Log("New Length: " + compressedJson.Length);
-
-        //var decompressedJson = Zip.Decompress(compressedJson);
 
         File.WriteAllText(Application.dataPath + "/LevelData.txt", compressedJson);
     }

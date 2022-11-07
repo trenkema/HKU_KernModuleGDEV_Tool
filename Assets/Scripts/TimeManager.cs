@@ -15,13 +15,13 @@ public class TimeManager : MonoBehaviour
     private void OnEnable()
     {
         EventSystemNew.Subscribe(Event_Type.GAME_STARTED, StartTimer);
-        EventSystemNew.Subscribe(Event_Type.LEVEL_COMPLETED, TimerFinished);
+        EventSystemNew.Subscribe(Event_Type.CHARACTER_FINISHED, TimerFinished);
     }
 
     private void OnDisable()
     {
         EventSystemNew.Unsubscribe(Event_Type.GAME_STARTED, StartTimer);
-        EventSystemNew.Unsubscribe(Event_Type.LEVEL_COMPLETED, TimerFinished);
+        EventSystemNew.Unsubscribe(Event_Type.CHARACTER_FINISHED, TimerFinished);
     }
 
     private void Awake()
