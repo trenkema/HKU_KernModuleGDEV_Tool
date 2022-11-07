@@ -23,7 +23,7 @@ public class Collectable : MonoBehaviour
         EventSystemNew<int>.RaiseEvent(Event_Type.COLLECTABLE_ADDED, -1);
     }
 
-    private void Start()
+    private void Awake()
     {
         EventSystemNew<int>.RaiseEvent(Event_Type.COLLECTABLE_ADDED, 1);
     }

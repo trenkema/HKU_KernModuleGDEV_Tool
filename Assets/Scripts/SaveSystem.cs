@@ -7,15 +7,19 @@ public class SaveSystem : MonoBehaviour
     [SerializeField] private string saveName = "LevelData";
     [SerializeField] private string directoryName = "Saves";
 
+    private AllLevelData storedLevelData = new AllLevelData();
+
     private void OnEnable()
     {
         EventSystemNew.Subscribe(Event_Type.LOAD_LEVEL, LoadLevel);
+        EventSystemNew.Subscribe(Event_Type.QUICK_LOAD_LEVEL, QuickLoadLevel);
         EventSystemNew.Subscribe(Event_Type.SAVE_LEVEL, SaveLevel);
     }
 
     private void OnDisable()
     {
         EventSystemNew.Unsubscribe(Event_Type.LOAD_LEVEL, LoadLevel);
+        EventSystemNew.Unsubscribe(Event_Type.QUICK_LOAD_LEVEL, QuickLoadLevel);
         EventSystemNew.Unsubscribe(Event_Type.SAVE_LEVEL, SaveLevel);
     }
 
@@ -39,9 +43,15 @@ public class SaveSystem : MonoBehaviour
 
         var decompressedJson = Zip.Decompress(json);
 
-        AllLevelData levelData = JsonUtility.FromJson<AllLevelData>(decompressedJson);
+        storedLevelData = JsonUtility.FromJson<AllLevelData>(decompressedJson);
 
-        TileLevelManager.Instance.LoadLevel(levelData.tileLevelData);
-        PrefabLevelEditor.Instance.LoadLevel(levelData.prefabLevelData);
+        TileLevelManager.Instance.LoadLevel(storedLevelData.tileLevelData);
+        PrefabLevelEditor.Instance.LoadLevel(storedLevelData.prefabLevelData);
+    }
+
+    private void QuickLoadLevel()
+    {
+        TileLevelManager.Instance.LoadLevel(storedLevelData.tileLevelData);
+        PrefabLevelEditor.Instance.LoadLevel(storedLevelData.prefabLevelData);
     }
 }

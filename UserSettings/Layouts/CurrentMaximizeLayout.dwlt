@@ -24,7 +24,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 100147
+  controlID: 101071
 --- !u!114 &2
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -141,7 +141,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 100148
+  controlID: 101072
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -166,7 +166,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 100149
+  controlID: 101073
 --- !u!114 &5
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -226,7 +226,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 148cfaff268cfaffa4f2fbff4e0ffcff4627fdffb230fdffba30fdffdc30fdffde30fdff7431fdff3232fdffd833fdff7834fdff1a35fdff0a36fdff9836fdff8437fdff1238fdff7e38fdff5e39fdfff639fdff0a3bfdffa43bfdff14d0fdffc662feff4e63feff7465feff9265feffd4c8feff78d6feff00ddfeff24fbffffb87f010060810100228301007c8501005e860100e8860100bc370200f8380200103b0200563e0200d29602001c980200eecf06006a0607004c2d070078320700744a07001a5407002469070088690700c46a0700e86c0700ae6d0700dc700700
+      m_ExpandedIDs: 7804faffda06faff148cfaff268cfaffa4f2fbff4e0ffcff4627fdffb230fdffba30fdffdc30fdffde30fdff7431fdff3232fdffd833fdff7834fdff1a35fdff0a36fdff9836fdff8437fdff1238fdff7e38fdff5e39fdfff639fdff0a3bfdffa43bfdff14d0fdffc662feff4e63feff7465feff9265feffd4c8feff78d6feff00ddfeff24fbffffb87f010060810100228301007c8501005e860100e8860100bc370200f8380200103b0200563e0200d29602001c980200eecf06006a0607004c2d070078320700744a07001a5407002469070088690700c46a0700e86c0700ae6d0700dc700700d0630900766d0900
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -269,8 +269,8 @@ MonoBehaviour:
     y: 0
     width: 1142
     height: 612
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 202, y: 221}
+  m_MaxSize: {x: 4002, y: 4021}
   m_ActualView: {fileID: 2}
   m_Panes:
   - {fileID: 8}
@@ -904,21 +904,21 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Prefabs
+    - Assets
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Prefabs
+  - Assets
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\School Werk\HKU\Jaar 2\HKU_KernModuleGDEV_Tool
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 79}
-    m_SelectedIDs: e2950000
-    m_LastClickedID: 38370
+    m_SelectedIDs: a6950000
+    m_LastClickedID: 38310
     m_ExpandedIDs: 00000000a6950000a8950000aa950000ac950000ae950000b0950000b2950000b4950000b695000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -1061,7 +1061,7 @@ MonoBehaviour:
     m_SaveData: []
   m_LockTracker:
     m_IsLocked: 0
-  m_LastSelectedObjectID: 485476
+  m_LastSelectedObjectID: 620836
 --- !u!114 &15
 MonoBehaviour:
   m_ObjectHideFlags: 52

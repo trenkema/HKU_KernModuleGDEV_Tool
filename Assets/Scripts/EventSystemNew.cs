@@ -19,6 +19,7 @@ public enum Event_Type
     ACTIVATE_LEVEL,
 
     LOAD_LEVEL,
+    QUICK_LOAD_LEVEL,
     SAVE_LEVEL,
 
     START_ADDED,

@@ -19,6 +19,8 @@ public enum LevelManagerType
 
 public class LevelManager : MonoBehaviour
 {
+    [SerializeField] float restartEditCooldown = 1f;
+
     [SerializeField] AudioSource audioSource;
 
     [SerializeField] GameObject pageSelector;
@@ -48,6 +50,7 @@ public class LevelManager : MonoBehaviour
     int finishPointsAdded = 0;
     bool retrieveOwnLevelsOnly = false;
     bool isPlaying = false;
+    bool canRestartEdit = true;
 
     int pageIndex = 0;
 
@@ -587,7 +590,7 @@ public class LevelManager : MonoBehaviour
 
     public void RestartGame()
     {
-        if (isPlaying)
+        if (isPlaying && canRestartEdit)
         {
             audioSource.time = 0;
             audioSource.Play();
@@ -596,7 +599,7 @@ public class LevelManager : MonoBehaviour
 
             HUDManager.Instance.gameOverUI.SetActive(false);
 
-            EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
+            EventSystemNew.RaiseEvent(Event_Type.QUICK_LOAD_LEVEL);
 
             StartGame();
         }
@@ -606,7 +609,7 @@ public class LevelManager : MonoBehaviour
     {
         if (_context.phase == InputActionPhase.Started)
         {
-            if (isPlaying)
+            if (isPlaying && canRestartEdit)
             {
                 audioSource.time = 0;
                 audioSource.Play();
@@ -615,7 +618,7 @@ public class LevelManager : MonoBehaviour
 
                 HUDManager.Instance.gameOverUI.SetActive(false);
 
-                EventSystemNew.RaiseEvent(Event_Type.LOAD_LEVEL);
+                EventSystemNew.RaiseEvent(Event_Type.QUICK_LOAD_LEVEL);
 
                 StartGame();
             }
@@ -624,7 +627,7 @@ public class LevelManager : MonoBehaviour
 
     public void EditGame()
     {
-        if (isPlaying)
+        if (isPlaying && canRestartEdit)
         {
             audioSource.Stop();
 
@@ -649,7 +652,7 @@ public class LevelManager : MonoBehaviour
     {
         if (_context.phase == InputActionPhase.Started)
         {
-            if (isPlaying)
+            if (isPlaying && canRestartEdit)
             {
                 EditGame();
             }
@@ -660,6 +663,10 @@ public class LevelManager : MonoBehaviour
     {
         if (startPointsAdded == 1 && finishPointsAdded == 1)
         {
+            canRestartEdit = false;
+
+            StartCoroutine(ResetRestartEditCooldown());
+
             audioSource.time = 0;
             audioSource.Play();
 
@@ -777,6 +784,13 @@ public class LevelManager : MonoBehaviour
         yield return new WaitForSeconds(0.25f);
 
         HUDManager.Instance.editorUI.SetActive(true);
+    }
+
+    private IEnumerator ResetRestartEditCooldown()
+    {
+        yield return new WaitForSeconds(restartEditCooldown);
+
+        canRestartEdit = true;
     }
 
     public void QuitGame()

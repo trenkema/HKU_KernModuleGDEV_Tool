@@ -16,6 +16,7 @@ public class LevelCollectables : MonoBehaviour
     {
         EventSystemNew<int>.Subscribe(Event_Type.COLLECTABLE_ADDED, CollectableAdded);
         EventSystemNew.Subscribe(Event_Type.COLLECTABLE_COLLECTED, CollectablePickedup);
+        EventSystemNew.Subscribe(Event_Type.QUICK_LOAD_LEVEL, Reset);
         EventSystemNew.Subscribe(Event_Type.GAME_STARTED, GameStarted);
     }
 
@@ -23,12 +24,18 @@ public class LevelCollectables : MonoBehaviour
     {
         EventSystemNew<int>.Unsubscribe(Event_Type.COLLECTABLE_ADDED, CollectableAdded);
         EventSystemNew.Unsubscribe(Event_Type.COLLECTABLE_COLLECTED, CollectablePickedup);
+        EventSystemNew.Unsubscribe(Event_Type.QUICK_LOAD_LEVEL, Reset);
         EventSystemNew.Unsubscribe(Event_Type.GAME_STARTED, GameStarted);
     }
 
     private void CollectableAdded(int _addedOrRemoved)
     {
         collectablesAdded += _addedOrRemoved;
+
+        if (_addedOrRemoved == 1)
+        {
+            totalCollectables = collectablesAdded;
+        }
 
         collectedText.text = pickedupCollectables + " / " + totalCollectables;
     }
@@ -40,7 +47,13 @@ public class LevelCollectables : MonoBehaviour
 
     private void GameStarted()
     {
+        pickedupCollectables = 0;
         totalCollectables = collectablesAdded;
         collectedText.text = pickedupCollectables + " / " + totalCollectables;
+    }
+
+    private void Reset()
+    {
+        collectablesAdded = 0;
     }
 }
