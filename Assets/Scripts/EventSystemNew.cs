@@ -18,6 +18,7 @@ public enum Event_Type
     DEACTIVATE_LEVEL,
     ACTIVATE_LEVEL,
 
+    SET_LEVEL_ID,
     LOAD_LEVEL,
     QUICK_LOAD_LEVEL,
     SAVE_LEVEL,
@@ -34,6 +35,7 @@ public enum Event_Type
 
     CHARACTER_FINISHED,
     CHARACTER_DIED,
+    UPLOAD_SCORE,
 
     TOGGLE_DRAGGING,
     STOP_ITEMS,
