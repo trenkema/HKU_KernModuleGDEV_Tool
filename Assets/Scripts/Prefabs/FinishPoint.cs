@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class FinishPoint : MonoBehaviour
 {
+    [SerializeField] GameObject missingCollectablesText;
+
     [SerializeField] float completeDelayTime = 2f;
 
     [SerializeField] Animator animator;
@@ -17,14 +19,18 @@ public class FinishPoint : MonoBehaviour
 
     bool gameStarted = false;
 
+    bool canFinish = false;
+
     private void OnEnable()
     {
         EventSystemNew.Subscribe(Event_Type.GAME_STARTED, GameStarted);
+        EventSystemNew.Subscribe(Event_Type.ALL_COLLECTABLES_COLLECTED, AllCollectablesCollected);
     }
 
     private void OnDisable()
     {
         EventSystemNew.Unsubscribe(Event_Type.GAME_STARTED, GameStarted);
+        EventSystemNew.Unsubscribe(Event_Type.ALL_COLLECTABLES_COLLECTED, AllCollectablesCollected);
     }
 
     private void OnDestroy()
@@ -41,15 +47,30 @@ public class FinishPoint : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player") && !levelCompleted && gameStarted)
         {
-            levelCompleted = true;
+            if (canFinish)
+            {
+                levelCompleted = true;
 
-            animator.SetBool("Finished", true);
+                animator.SetBool("Finished", true);
 
-            audioSource.PlayOneShot(finishClip);
+                audioSource.PlayOneShot(finishClip);
 
-            EventSystemNew.RaiseEvent(Event_Type.CHARACTER_FINISHED);
+                EventSystemNew.RaiseEvent(Event_Type.CHARACTER_FINISHED);
 
-            Invoke("CompleteLevel", completeDelayTime);
+                Invoke("CompleteLevel", completeDelayTime);
+            }
+            else
+            {
+                missingCollectablesText.SetActive(true);
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && !levelCompleted && gameStarted)
+        {
+            missingCollectablesText.SetActive(false);
         }
     }
 
@@ -61,5 +82,10 @@ public class FinishPoint : MonoBehaviour
     private void CompleteLevel()
     {
         EventSystemNew.RaiseEvent(Event_Type.LEVEL_COMPLETED);
+    }
+
+    private void AllCollectablesCollected()
+    {
+        canFinish = true;
     }
 }

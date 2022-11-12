@@ -43,6 +43,11 @@ public class LevelCollectables : MonoBehaviour
     private void CollectablePickedup()
     {
         pickedupCollectables++;
+
+        if (pickedupCollectables >= totalCollectables)
+        {
+            EventSystemNew.RaiseEvent(Event_Type.ALL_COLLECTABLES_COLLECTED);
+        }
     }
 
     private void GameStarted()
