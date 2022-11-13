@@ -17,6 +17,7 @@ public class TimeManager : MonoBehaviour
     {
         EventSystemNew.Subscribe(Event_Type.GAME_STARTED, StartTimer);
         EventSystemNew.Subscribe(Event_Type.CHARACTER_FINISHED, TimerFinished);
+        EventSystemNew.Subscribe(Event_Type.CHARACTER_DIED, StopTimer);
         EventSystemNew<string>.Subscribe(Event_Type.SET_LEVEL_ID, SetLevelID);
     }
 
@@ -24,6 +25,7 @@ public class TimeManager : MonoBehaviour
     {
         EventSystemNew.Unsubscribe(Event_Type.GAME_STARTED, StartTimer);
         EventSystemNew.Unsubscribe(Event_Type.CHARACTER_FINISHED, TimerFinished);
+        EventSystemNew.Unsubscribe(Event_Type.CHARACTER_DIED, StopTimer);
         EventSystemNew<string>.Unsubscribe(Event_Type.SET_LEVEL_ID, SetLevelID);
     }
 
@@ -55,6 +57,11 @@ public class TimeManager : MonoBehaviour
         timerRunning = false;
 
         EventSystemNew<float, string>.RaiseEvent(Event_Type.UPLOAD_SCORE, timeElapsed, levelID);
+    }
+
+    private void StopTimer()
+    {
+        timerRunning = false;
     }
 
     private void DisplayTime()
