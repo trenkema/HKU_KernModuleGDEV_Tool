@@ -163,7 +163,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isWallJumping)
         {
-            if (!isMoving)
+            if (!isMoving || !canMove)
             {
                 curMovementInput = Vector2.SmoothDamp(curMovementInput, Vector2.zero, ref smoothInputVelocity, smoothInputSpeed);
             }
