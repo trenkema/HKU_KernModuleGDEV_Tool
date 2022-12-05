@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using LootLocker.Requests;
 
 public class TimeManager : MonoBehaviour
 {
@@ -56,7 +57,9 @@ public class TimeManager : MonoBehaviour
     {
         timerRunning = false;
 
-        EventSystemNew<float, string>.RaiseEvent(Event_Type.UPLOAD_SCORE, timeElapsed, levelID);
+        Debug.Log("LevelID: " + levelID);
+
+        EventSystemNew<float, string, bool>.RaiseEvent(Event_Type.UPLOAD_SCORE, timeElapsed, levelID, levelID != string.Empty);
     }
 
     private void StopTimer()

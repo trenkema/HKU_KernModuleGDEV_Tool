@@ -9,6 +9,8 @@ using System.Linq;
 
 public class HighScoreManager : MonoBehaviour
 {
+    [SerializeField] GameObject showHighScores;
+    [SerializeField] GameObject hideHighScores;
     [SerializeField] TextMeshProUGUI highScoresText;
 
     [SerializeField] int maxScores = 3;
@@ -22,16 +24,19 @@ public class HighScoreManager : MonoBehaviour
 
     private void OnEnable()
     {
-        EventSystemNew<float, string>.Subscribe(Event_Type.UPLOAD_SCORE, UploadTime);
+        EventSystemNew<float, string, bool>.Subscribe(Event_Type.UPLOAD_SCORE, UploadTime);
     }
 
     private void OnDisable()
     {
-        EventSystemNew<float, string>.Unsubscribe(Event_Type.UPLOAD_SCORE, UploadTime);
+        EventSystemNew<float, string, bool>.Unsubscribe(Event_Type.UPLOAD_SCORE, UploadTime);
     }
 
     private void Awake()
     {
+        showHighScores.SetActive(false);
+        hideHighScores.SetActive(false);
+
         LootLockerSDKManager.GetPlayerName((response) =>
         {
             if (response.success)
@@ -45,8 +50,15 @@ public class HighScoreManager : MonoBehaviour
         });
     }
 
-    private void UploadTime(float _time, string _assetID)
+    private void UploadTime(float _time, string _assetID, bool _upload)
     {
+        if (!_upload)
+        {
+            showHighScores.SetActive(false);
+            hideHighScores.SetActive(true);
+            return;
+        }
+
         LootLockerSDKManager.GetMemberRank(highscoreDatabaseID.ToString(), int.Parse(_assetID), (levelResponse) =>
         {
             if (levelResponse.statusCode != 200)
@@ -166,6 +178,9 @@ public class HighScoreManager : MonoBehaviour
 
     private void DisplayScores()
     {
+        showHighScores.SetActive(true);
+        hideHighScores.SetActive(false);
+
         highScoresText.text = "";
 
         for (int i = 0; i < scores.Count; i++)

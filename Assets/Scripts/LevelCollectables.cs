@@ -52,6 +52,11 @@ public class LevelCollectables : MonoBehaviour
 
     private void GameStarted()
     {
+        if (totalCollectables == 0)
+        {
+            EventSystemNew.RaiseEvent(Event_Type.ALL_COLLECTABLES_COLLECTED);
+        }
+
         pickedupCollectables = 0;
         totalCollectables = collectablesAdded;
         collectedText.text = pickedupCollectables + " / " + totalCollectables;

@@ -9,6 +9,7 @@ using UnityEngine.Networking;
 using UnityEditor;
 using UnityEngine.InputSystem;
 using Assets.SimpleZip;
+using UnityEngine.SceneManagement;
 
 public enum LevelManagerType
 {

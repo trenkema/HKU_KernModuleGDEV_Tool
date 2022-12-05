@@ -30,6 +30,8 @@ public class SaveSystem : MonoBehaviour
         allLevelData.tileLevelData = TileLevelManager.Instance.SaveLevel();
         allLevelData.prefabLevelData = PrefabLevelEditor.Instance.SaveLevel();
 
+        storedLevelData = allLevelData;
+
         string json = JsonUtility.ToJson(allLevelData, false);
 
         var compressedJson = Zip.CompressToString(json);
